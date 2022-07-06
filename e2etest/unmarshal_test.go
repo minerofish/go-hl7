@@ -26,7 +26,7 @@ func Test_Parse_MSH_Record(t *testing.T) {
 	//assert.Equal(t, "", message.MSH.SendingFacility)
 	//assert.Equal(t, "", message.MSH.ReceivingApplication)
 	assert.Equal(t, "LAB", message.MSH.ReceivingFacility)
-	//tmp := assert.Equal(t, time.Parse("YYMMDD", "20110926125155"), message.MSH.DateTimeOfMessage.String()) // TODO: fix formatting err
+	assert.Equal(t, "2011-09-26 10:51:55 +0000 UTC", message.MSH.DateTimeOfMessage.String())
 	assert.Equal(t, "", message.MSH.Security)
 	assert.Equal(t, "ORM", message.MSH.MessageType)
 	assert.Equal(t, "O01", message.MSH.MessageTriggerEvent)
