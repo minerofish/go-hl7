@@ -3,7 +3,6 @@ package hl7v23
 // Extended Composite ID With Check Digit
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CX
 type CX23 struct {
-	// TODO
 }
 
 // XPN - Extended Person Name
@@ -24,12 +23,12 @@ type XTN23 struct {
 // CE - Coded Element
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CE
 type CE23 struct {
-	Identifier                  string
-	Text                        string
-	NameOFCodingSystem          string
-	AlternateIdentifier         string
-	AlternateText               string
-	NameOfAlternateCodingSystem string
+	Identifier                  string `hl7:"1.1"`
+	Text                        string `hl7:"1.2"`
+	NameOFCodingSystem          string `hl7:"1.3"`
+	AlternateIdentifier         string `hl7:"1.4"`
+	AlternateText               string `hl7:"1.5"`
+	NameOfAlternateCodingSystem string `hl7:"1.6"`
 }
 
 // DLN - Driver's License Number
@@ -50,7 +49,9 @@ type XCN23 struct {
 // HD - Hierarchic Designator
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/HD
 type HD23 struct {
-	// TODO
+	NamespaceId     string `hl7:"1.1"`
+	UniversalId     string `hl7:"1.2"`
+	UniversalIdType string `hl7:"1.3"`
 }
 
 type Sex string

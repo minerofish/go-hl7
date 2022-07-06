@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/DRK-Blutspende-BaWueHe/go-hl7/hl7"
@@ -9,7 +10,7 @@ import (
 )
 
 func Test_Parse_MSH_Record(t *testing.T) {
-	fileData := `MSH|^~\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\r`
+	fileData := fmt.Sprintf("MSH|^~\\&|HL7_Host^b^c|HL7_Office^^|CIT^^|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1~second_element|<\u000d")
 
 	var message hl7v23.ORM_001
 	err := hl7.Unmarshal(
@@ -22,10 +23,12 @@ func Test_Parse_MSH_Record(t *testing.T) {
 	assert.NotNil(t, message.MSH)
 	assert.Equal(t, "MSH", message.MSH.FieldSeparator)
 	assert.Equal(t, "^~\\&", message.MSH.EncodingCharacters)
-	//assert.Equal(t, "", message.MSH.SendingApplication)
-	//assert.Equal(t, "", message.MSH.SendingFacility)
-	//assert.Equal(t, "", message.MSH.ReceivingApplication)
-	assert.Equal(t, "LAB", message.MSH.ReceivingFacility)
+	assert.Equal(t, "HL7_Host", message.MSH.SendingApplication.NamespaceId)
+	assert.Equal(t, "b", message.MSH.SendingApplication.UniversalId)
+	assert.Equal(t, "c", message.MSH.SendingApplication.UniversalIdType)
+	assert.Equal(t, "HL7_Office", message.MSH.SendingFacility.NamespaceId)
+	assert.Equal(t, "CIT", message.MSH.ReceivingApplication.NamespaceId)
+	assert.Equal(t, "LAB", message.MSH.ReceivingFacility.NamespaceId)
 	assert.Equal(t, "2011-09-26 10:51:55 +0000 UTC", message.MSH.DateTimeOfMessage.String())
 	assert.Equal(t, "", message.MSH.Security)
 	assert.Equal(t, "ORM", message.MSH.MessageType)
@@ -38,8 +41,9 @@ func Test_Parse_MSH_Record(t *testing.T) {
 	assert.Equal(t, "ER", message.MSH.AcceptAcknowledgementType)
 	assert.Equal(t, "ER", message.MSH.ApplicationAcknowledgementType)
 	assert.Equal(t, "", message.MSH.CountryCode)
-	//assert.Equal(t, "", message.MSH.CharacterSet)
-	//assert.Equal(t, "8859/1", message.MSH.PrincipalLanguageOfMessage)
+	assert.Equal(t, "8859/1", message.MSH.CharacterSet[0])
+	assert.Equal(t, "second_element", message.MSH.CharacterSet[1])
+	assert.Equal(t, "<", message.MSH.PrincipalLanguageOfMessage.Identifier)
 }
 
 func Test_Parse_PID_Record(t *testing.T) {
