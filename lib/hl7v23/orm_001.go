@@ -4,66 +4,44 @@
 //
 package hl7v23
 
-import "time"
-
 type ORM_001 struct {
-	MSH              MSH `hl7:"MSH"`
-	NotesAndComments NTE `hl7:"NTE,optional"`
-	Patient          struct {
-		PatientIdentification PID   `hl7:"PID"`
-		PattientDemographics  PD1   `hl7:"PD1"`
-		NotesAndComments      []NTE `hl7:"NTE,optional"`
-	} `hl7:"optional"`
-	PatientVisit struct {
-		PatientVisit          PV1 `hl7:"PV1"`
-		AdditionalInformation PV2 `hl7:"PV2,optional"`
-	} `hl7:"optional"`
-	Insurance []struct {
-		Insurance             IN1 `hl7:"IN1"`
-		AdditionalInformation IN2 `hl7:"IN2,optional"`
-		Certification         IN3 `hl7:"IN3,optional"`
-	} `hl7:"optional"`
-	Garantor                  GT1 `hl7:"GT1,optional"`
-	PatientAllergyInformation AL1 `hl7:"AL1,optional"`
-	Order                     struct {
-		CommondOrderSegment ORC `hl7:"ORC"`
-		Detail              struct {
-			ObservationRequestSegment OBR `hl7:"OBR,optional"`
-			RequisitionDetail         RQD `hl7:"RQD,optional"`
-			RequisitionDetail1        RQ1 `hl7:"RQ1,optional"`
-			PharmacyPrescription      RXO `hl7:"RQ1,optional"`
-			DietaryOrders             ODS `hl7:"ODS,optional"`
-			DietTrayInstructions      ODT `hl7:"ODT,optional"`
+	MSH MSH `hl7:"MSH"`
+	/*
+		NotesAndComments NTE `hl7:"NTE,optional"`
+		Patient          struct {
+			PatientIdentification PID   `hl7:"PID"`
+			PattientDemographics  PD1   `hl7:"PD1"`
+			NotesAndComments      []NTE `hl7:"NTE,optional"`
+		} `hl7:"optional"`
+		PatientVisit struct {
+			PatientVisit          PV1 `hl7:"PV1"`
+			AdditionalInformation PV2 `hl7:"PV2,optional"`
+		} `hl7:"optional"`
+		Insurance []struct {
+			Insurance             IN1 `hl7:"IN1"`
+			AdditionalInformation IN2 `hl7:"IN2,optional"`
+			Certification         IN3 `hl7:"IN3,optional"`
+		} `hl7:"optional"`
+		Garantor                  GT1 `hl7:"GT1,optional"`
+		PatientAllergyInformation AL1 `hl7:"AL1,optional"`
+		Order                     struct {
+			CommondOrderSegment ORC `hl7:"ORC"`
+			Detail              struct {
+				ObservationRequestSegment OBR `hl7:"OBR,optional"`
+				RequisitionDetail         RQD `hl7:"RQD,optional"`
+				RequisitionDetail1        RQ1 `hl7:"RQ1,optional"`
+				PharmacyPrescription      RXO `hl7:"RQ1,optional"`
+				DietaryOrders             ODS `hl7:"ODS,optional"`
+				DietTrayInstructions      ODT `hl7:"ODT,optional"`
+			}
+			NotesAndComments            []NTE `hl7:"NTE,optional"`
+			Diagnosis                   DG1   `hl7:"DG1,optional"`
+			Observation                 OBX   `hl7:"OBX,optional"`
+			ObservationNotesAndComments []NTE `hl7:"NTE,optional"`
+			ClinicalTrialIdentification []CTI `hl7:"CTI,optional"`
+			Billing                     BLG   `hl7:"BLG,optional"`
 		}
-		NotesAndComments            []NTE `hl7:"NTE,optional"`
-		Diagnosis                   DG1   `hl7:"DG1,optional"`
-		Observation                 OBX   `hl7:"OBX,optional"`
-		ObservationNotesAndComments []NTE `hl7:"NTE,optional"`
-		ClinicalTrialIdentification []CTI `hl7:"CTI,optional"`
-		Billing                     BLG   `hl7:"BLG,optional"`
-	}
-}
-
-type MSH struct {
-	FieldSeparator                 string    `hl7:"1"`
-	EncodingCharacters             string    `hl7:"2"`
-	SendingApplication             string    `hl7:"3"`
-	SendingFacility                string    `hl7:"4"`
-	ReceivingApplication           string    `hl7:"5"`
-	ReceivingFacility              string    `hl7:"6"`
-	DateTimeOfMessage              time.Time `hl7:"7"`
-	Security                       string    `hl7:"8"`
-	MessageType                    string    `hl7:"9"`
-	MessageControlID               string    `hl7:"10"`
-	ProccessingID                  string    `hl7:"11"`
-	VersionID                      string    `hl7:"12"`
-	SequenceNumber                 int       `hl7:"13"`
-	ContinuationPointer            string    `hl7:"14"`
-	AcceptAcknowledgementType      string    `hl7:"15"`
-	ApplicationAcknowledgementType string    `hl7:"16"`
-	CountryCode                    string    `hl7:"17"`
-	CharacterSet                   []string  `hl7:"18"`
-	PrincipalLanguageOfMessage     string    `hl7:"19"`
+	*/
 }
 
 //  PV1 - Patient visit

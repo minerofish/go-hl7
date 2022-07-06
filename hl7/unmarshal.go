@@ -1,6 +1,7 @@
 package hl7
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"reflect"
@@ -8,53 +9,46 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aglyzov/charmap"
+	"golang.org/x/text/encoding/charmap"
 )
 
 func Unmarshal(messageData []byte, targetStruct interface{}, enc Encoding, tz Timezone) error {
-
 	var (
 		messageBytes []byte
 		err          error
 	)
+
 	switch enc {
 	case EncodingUTF8:
-		// do nothing, this is correct
 		messageBytes = messageData
 	case EncodingASCII:
 		messageBytes = messageData
 	case EncodingDOS866:
-		messageBytes, err = charmap.ANY_to_UTF8(messageData, "DOS866")
-		if err != nil {
-			return errors.New(fmt.Sprintf("Invalid input : %s", err))
+		if messageBytes, err = EncodeCharsetToUTF8From(charmap.CodePage866, messageData); err != nil {
+			return err
 		}
 	case EncodingDOS855:
-		messageBytes, err = charmap.ANY_to_UTF8(messageData, "DOS855")
-		if err != nil {
-			return errors.New(fmt.Sprintf("Invalid input : %s", err))
+		if messageBytes, err = EncodeCharsetToUTF8From(charmap.CodePage855, messageData); err != nil {
+			return err
 		}
 	case EncodingDOS852:
-		messageBytes, err = charmap.ANY_to_UTF8(messageData, "DOS852")
-		if err != nil {
-			return errors.New(fmt.Sprintf("Invalid input : %s", err))
+		if messageBytes, err = EncodeCharsetToUTF8From(charmap.CodePage852, messageData); err != nil {
+			return err
 		}
 	case EncodingWindows1250:
-		messageBytes, err = charmap.ANY_to_UTF8(messageData, "CP1250")
-		if err != nil {
-			return errors.New(fmt.Sprintf("Invalid input : %s", err))
+		if messageBytes, err = EncodeCharsetToUTF8From(charmap.Windows1250, messageData); err != nil {
+			return err
 		}
 	case EncodingWindows1251:
-		messageBytes, err = charmap.ANY_to_UTF8(messageData, "CP1251")
-		if err != nil {
-			return errors.New(fmt.Sprintf("Invalid input : %s", err))
+		if messageBytes, err = EncodeCharsetToUTF8From(charmap.Windows1251, messageData); err != nil {
+			return err
 		}
 	case EncodingWindows1252:
-		messageBytes, err = charmap.ANY_to_UTF8(messageData, "CP1252")
-		if err != nil {
-			return errors.New(fmt.Sprintf("Invalid input : %s", err))
+		if messageBytes, err = EncodeCharsetToUTF8From(charmap.Windows1252, messageData); err != nil {
+			return err
 		}
 	default:
-		return errors.New(fmt.Sprintf("Invalid Codepage Code:%d", enc))
+		return fmt.Errorf("invalid Codepage Id='%d' - %w", enc, err)
 	}
 
 	// first try to break by 0x0a (non-standard, but used sometimes)
@@ -70,7 +64,6 @@ func Unmarshal(messageData []byte, targetStruct interface{}, enc Encoding, tz Ti
 		bufferedInputLines[i] = strings.Trim(bufferedInputLines[i], string([]byte{0x0A}))
 		bufferedInputLines[i] = strings.Trim(bufferedInputLines[i], string([]byte{0x0D}))
 		fmt.Println(">", bufferedInputLines[i])
-
 	}
 
 	_, _, err = reflectInputToStruct(bufferedInputLines, 1 /*recursion-depth*/, 0 /*current line*/, targetStruct, enc, tz)
@@ -79,6 +72,17 @@ func Unmarshal(messageData []byte, targetStruct interface{}, enc Encoding, tz Ti
 	}
 
 	return nil
+}
+
+func EncodeCharsetToUTF8From(charmap *charmap.Charmap, data []byte) ([]byte, error) {
+	sr := bytes.NewReader(data)
+	e := charmap.NewDecoder().Reader(sr)
+	bytes := make([]byte, len(data)*2)
+	n, err := e.Read(bytes)
+	if err != nil {
+		return []byte{}, err
+	}
+	return bytes[:n], nil
 }
 
 type RETV int
@@ -247,22 +251,22 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 
 		hasOverrideDelimiterAnnotation := false
 		inputIsRequired := false
-		astmTag := record.Type().Field(j).Tag.Get("astm")
-		if astmTag == "" {
+		hl7Tag := record.Type().Field(j).Tag.Get("hl7")
+		if hl7Tag == "" {
 			continue // nothing to process when someone requires astm:
 		}
-		astmTagsList := strings.Split(astmTag, ",")
-		for i := 0; i < len(astmTagsList); i++ {
-			astmTagsList[i] = strings.Trim(astmTagsList[i], " ")
+		hl7TagsList := strings.Split(hl7Tag, ",")
+		for i := 0; i < len(hl7TagsList); i++ {
+			hl7TagsList[i] = strings.Trim(hl7TagsList[i], " ")
 		}
-		if sliceContainsString(astmTagsList, ANNOTATION_DELIMITER) {
+		if sliceContainsString(hl7TagsList, ANNOTATION_DELIMITER) {
 			// the delimiter is instantly replaced with the delimiters from the file for further parsing. By default that is "\^&"
 			hasOverrideDelimiterAnnotation = true
 		}
-		if sliceContainsString(astmTagsList, ANNOTATION_REQUIRED) {
+		if sliceContainsString(hl7TagsList, ANNOTATION_REQUIRED) {
 			inputIsRequired = true
 		}
-		currentInputFieldNo, repeat, component, err := readFieldAddressAnnotation(astmTagsList[0])
+		currentInputFieldNo, repeat, component, err := readFieldAddressAnnotation(hl7TagsList[0])
 		if err != nil {
 			return errors.New(fmt.Sprintf("Invalid annotation for field %s. (%s)", record.Type().Field(j).Name, err))
 		}
@@ -276,7 +280,7 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 			if value, err := extractAstmFieldByRepeatAndComponent(inputFields[currentInputFieldNo], repeat, component); err == nil {
 
 				// in headers there can be special characters, that is why the value needs to disregard the delimiters:
-				if isHeader {
+				if isHeader && hasOverrideDelimiterAnnotation {
 					value = inputFields[currentInputFieldNo]
 				}
 
@@ -284,10 +288,10 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 
 				if hasOverrideDelimiterAnnotation { // the first three characters become the new delimiters
 					if len(value) >= 1 {
-						RepeatDelimiter = value[0:1]
+						RepeatDelimiter = value[1:2]
 					}
 					if len(value) >= 2 {
-						ComponentDelimiter = value[1:2]
+						ComponentDelimiter = value[0:1]
 					}
 					if len(value) >= 3 {
 						EscapeDelimiter = value[2:3]
@@ -394,8 +398,7 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 				return errors.New(fmt.Sprintf("Unrecognized time format <%s>", inputFieldValue))
 			}
 		default:
-			return errors.New(fmt.Sprintf("Invalid field-Type '%s' for mapping (not implemented): '%s'",
-				reflect.TypeOf(recordfield.Interface()).Kind(), inputStr))
+			return errors.New(fmt.Sprintf("Invalid field-Type '%s' for field '%s", reflect.TypeOf(recordfield.Interface()).Kind(), record.Field(j).Type().Name()))
 		}
 	}
 

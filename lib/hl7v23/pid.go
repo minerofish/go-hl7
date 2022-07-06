@@ -1,5 +1,7 @@
 package hl7v23
 
+import "time"
+
 // PID - Patient Identification
 // https://hl7-definition.caristix.com/v2/HL7v2.3/Segments/PID
 type PID struct {
