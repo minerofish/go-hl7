@@ -5,8 +5,8 @@ import "time"
 // MSH - Message header segment
 // https://hl7-definition.caristix.com/v2/HL7v2.3/Segments/MSH
 type MSH struct {
-	FieldSeparator                 string    `hl7:"1"`
-	EncodingCharacters             string    `hl7:"2,delimiter"`
+	FieldSeparator                 string    `hl7:"1,delimiter"`
+	EncodingCharacters             string    `hl7:"2"`
 	SendingApplication             HD23      `hl7:"3"`
 	SendingFacility                HD23      `hl7:"4"`
 	ReceivingApplication           HD23      `hl7:"5"`

@@ -9,11 +9,12 @@ type ORM_001 struct {
 	/*
 		NotesAndComments NTE `hl7:"NTE,optional"`
 	*/
+	//PatientIdentification PID `hl7:"PID"`
 	Patient struct {
-		PatientIdentification PID   `hl7:"PID"`
-		PattientDemographics  PD1   `hl7:"PD1"`
-		NotesAndComments      []NTE `hl7:"NTE,optional"`
-	} `hl7:"optional"`
+		PatientIdentification PID `hl7:"PID,optional"`
+		//PattientDemographics  PD1   `hl7:"PD1,optional"`
+		//NotesAndComments      []NTE `hl7:"NTE",optional`
+	}
 	/*
 		PatientVisit struct {
 			PatientVisit          PV1 `hl7:"PV1"`

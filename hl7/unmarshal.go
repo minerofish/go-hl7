@@ -120,10 +120,38 @@ func reflectInputToStruct(bufferedInputLines []string, depth int, currentInputLi
 		currentRecord := targetStructValue.Field(i)
 		ftype := targetStructType.Field(i)
 		hl7 := ftype.Tag.Get("hl7")
-		tagsList := strings.Split(hl7, ",")
+		tagsList := removeEmptyStrings(strings.Split(hl7, ","))
 
+		// if it is not annotated
 		if len(tagsList) < 1 {
-			continue // not annotated = no processing
+			switch currentRecord.Kind() {
+			case reflect.Struct:
+				var err error
+				var retv RETV
+
+				currentInputLine, retv, err = reflectInputToStruct(bufferedInputLines, depth+1, currentInputLine, currentRecord.Addr().Interface(), enc, tz)
+				if err != nil {
+					if retv == UNEXPECTED {
+						if depth > 0 {
+							// if nested structures abort due to unexpected records that does not create an error
+							// as the parse will be continued one level higher
+							break
+						} else {
+							return currentInputLine, ERROR, err
+						}
+					}
+					if retv == ERROR { // a serious error ends the processing
+						return currentInputLine, ERROR, err
+					}
+				}
+				break
+
+			case reflect.Slice:
+				panic("Slice is not implemented yet!")
+				// break
+			}
+
+			continue
 		}
 
 		fmt.Println("Looking for ", hl7)
@@ -406,11 +434,21 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 			elemType := getTypeArray(recordfield.Interface())
 			recordfield = reflect.MakeSlice(reflect.SliceOf(elemType), elementCount, elementCount)
 
-			// TODO: add nested object support
-			for i, fieldPart := range fieldParts {
-				recordfield.Index(i).Set(reflect.ValueOf(fieldPart))
+			// if it is an object of the array
+			if elemType.Kind() == reflect.Struct {
+				for i, fieldPart := range fieldParts {
+					if err = reflectAnnotatedFields(fieldPart, recordfield.Index(i), timezone, isHeader); err != nil {
+						return errors.New(fmt.Sprintf("Unrecognized time format <%s>", fieldPart))
+					}
+				}
+			} else {
+				// else its an array of prmitive types
+				for i, fieldPart := range fieldParts {
+					recordfield.Index(i).Set(reflect.ValueOf(fieldPart))
+				}
 			}
 			record.Field(j).Set(recordfield)
+
 			break
 
 		default:
@@ -459,7 +497,7 @@ func readFieldAddressAnnotation(annotation string) (field int, repeat int, compo
 		}
 	}
 
-	return field - 1, repeat - 1, component - 1, nil
+	return field, repeat - 1, component - 1, nil
 }
 
 // input is an unpacked field from an astm-file free of the field delimiter ("|")
@@ -490,4 +528,14 @@ func sliceContainsString(list []string, search string) bool {
 		}
 	}
 	return false
+}
+
+func removeEmptyStrings(s []string) []string {
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
 }
