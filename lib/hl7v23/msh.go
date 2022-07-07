@@ -7,10 +7,10 @@ import "time"
 type MSH struct {
 	FieldSeparator                 string    `hl7:"1,delimiter"`
 	EncodingCharacters             string    `hl7:"2"`
-	SendingApplication             HD23      `hl7:"3"`
-	SendingFacility                HD23      `hl7:"4"`
-	ReceivingApplication           HD23      `hl7:"5"`
-	ReceivingFacility              HD23      `hl7:"6"`
+	SendingApplication             HD        `hl7:"3"`
+	SendingFacility                HD        `hl7:"4"`
+	ReceivingApplication           HD        `hl7:"5"`
+	ReceivingFacility              HD        `hl7:"6"`
 	DateTimeOfMessage              time.Time `hl7:"7"`
 	Security                       string    `hl7:"8"`
 	MessageType                    string    `hl7:"9.1"`
@@ -24,5 +24,5 @@ type MSH struct {
 	ApplicationAcknowledgementType string    `hl7:"16"`
 	CountryCode                    string    `hl7:"17"`
 	CharacterSet                   []string  `hl7:"18"`
-	PrincipalLanguageOfMessage     CE23      `hl7:"19"`
+	PrincipalLanguageOfMessage     CE        `hl7:"19"`
 }

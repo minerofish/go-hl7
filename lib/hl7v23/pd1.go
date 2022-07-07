@@ -5,14 +5,14 @@ package hl7v23
 type PD1 struct {
 	LivingDependency    []string `hl7:"1"`
 	LivingArrangement   string   `hl7:"2"`
-	PrimaryFacility     []XON23  `hl7:"3"`
-	PrimaryCarePrvoider []XCN23  `hl7:"4"`
+	PrimaryFacility     []XON    `hl7:"3"`
+	PrimaryCarePrvoider []XCN    `hl7:"4"`
 	StudentIndicator    string   `hl7:"5"`
 	Handicap            string   `hl7:"6"`
 	LivingWill          string   `hl7:"7"`
 	OrganDonor          string   `hl7:"8"`
 	SeparateBill        string   `hl7:"9"`
-	DuplicatePatient    []CX23   `hl7:"10"`
-	PublicityIndicator  CE23     `hl7:"11"`
+	DuplicatePatient    []CX     `hl7:"10"`
+	PublicityIndicator  CE       `hl7:"11"`
 	ProtectionIndicator string   `hl7:"12"`
 }

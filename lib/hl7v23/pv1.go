@@ -9,11 +9,11 @@ type PV1 struct {
 	PatientClass            string      `hl7:"2"`
 	AssignedPatientLocation PL          `hl7:"3"`
 	AdmissionType           string      `hl7:"4"`
-	PreadmitNumber          CX23        `hl7:"5"`
+	PreadmitNumber          CX          `hl7:"5"`
 	PriorPatientLocation    PL          `hl7:"6"`
-	AttendingDoctor         []XCN23     `hl7:"7"`
-	ReferringDoctor         []XCN23     `hl7:"8"`
-	ConsultingDoctor        []XCN23     `hl7:"9"`
+	AttendingDoctor         []XCN       `hl7:"7"`
+	ReferringDoctor         []XCN       `hl7:"8"`
+	ConsultingDoctor        []XCN       `hl7:"9"`
 	HospitalService         string      `hl7:"10"`
 	TemporaryLocation       PL          `hl7:"11"`
 	PreadmitTestIndicator   string      `hl7:"12"`
@@ -21,9 +21,9 @@ type PV1 struct {
 	AdmitSource             string      `hl7:"14"`
 	AmbulatoryStatus        []string    `hl7:"15"`
 	VIPIndicator            string      `hl7:"16"`
-	AdmittingDoctor         []XCN23     `hl7:"17"`
+	AdmittingDoctor         []XCN       `hl7:"17"`
 	PatientType             string      `hl7:"18"`
-	VisitNumber             CX23        `hl7:"19"`
+	VisitNumber             CX          `hl7:"19"`
 	FinancialClass          FC          `hl7:"20"`
 	ChargePriceIndicator    string      `hl7:"21"`
 	CourtesyCode            string      `hl7:"22"`
@@ -54,7 +54,7 @@ type PV1 struct {
 	TotalCharges            float32     `hl7:"47"`
 	TotalAdjustments        float32     `hl7:"48"`
 	TotalPayments           float32     `hl7:"49"`
-	AlternateVisitID        CX23        `hl7:"50"`
+	AlternateVisitID        CX          `hl7:"50"`
 	VisitIndicator1         string      `hl7:"51"`
-	OhterHealthcareProvider []XCN23     `hl7:"52"`
+	OhterHealthcareProvider []XCN       `hl7:"52"`
 }

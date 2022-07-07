@@ -3,8 +3,8 @@ package hl7v23
 // PID - Patient Identification
 // https://hl7-definition.caristix.com/v2/HL7v2.3/Segments/PID
 type PID struct {
-	ID         int    `hl7:"1"`
-	ExternalID []CX23 `hl7:"2"`
+	ID         int  `hl7:"1"`
+	ExternalID []CX `hl7:"2"`
 	/*
 		ExternalID              []CX23    `hl7:"2"`
 		InternalID              []CX23    `hl7:"3"`
