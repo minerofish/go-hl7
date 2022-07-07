@@ -8,11 +8,13 @@ type ORM_001 struct {
 	MSH MSH `hl7:"MSH"`
 	/*
 		NotesAndComments NTE `hl7:"NTE,optional"`
-		Patient          struct {
-			PatientIdentification PID   `hl7:"PID"`
-			PattientDemographics  PD1   `hl7:"PD1"`
-			NotesAndComments      []NTE `hl7:"NTE,optional"`
-		} `hl7:"optional"`
+	*/
+	Patient struct {
+		PatientIdentification PID   `hl7:"PID"`
+		PattientDemographics  PD1   `hl7:"PD1"`
+		NotesAndComments      []NTE `hl7:"NTE,optional"`
+	} `hl7:"optional"`
+	/*
 		PatientVisit struct {
 			PatientVisit          PV1 `hl7:"PV1"`
 			AdditionalInformation PV2 `hl7:"PV2,optional"`

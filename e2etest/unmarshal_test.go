@@ -60,7 +60,7 @@ PID|1||00100M56016||Smith^Harry||19500412|M\r`
 	assert.Nil(t, err)
 
 	assert.NotNil(t, message.Patient)
-	assert.Equal(t, "1", message.Patient.PatientIdentification.ID)
+	assert.Equal(t, 1, message.Patient.PatientIdentification.ID)
 	// TODO: add other PID asserts here
 }
 
