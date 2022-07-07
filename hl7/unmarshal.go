@@ -416,20 +416,19 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 		case reflect.Slice:
 			fieldParts := strings.Split(inputFields[currentInputFieldNo], RepeatDelimiter)
 			elementCount := len(fieldParts)
-			elemType := reflect.TypeOf(reflect.Slice)
+			elemType := getTypeArray(recordfield.Interface())
 			elements := reflect.MakeSlice(reflect.SliceOf(elemType), elementCount, elementCount)
 
 			for i, fieldPart := range fieldParts {
-				elements.Index(i).SetString("magic-string")
+				// TODO: add new string array to the return
+				elements.Index(i).SetString(fieldPart)
+				fmt.Println("Stored string:", elements.Index(i))
 				/*
-					allocatedElement := reflect.New(elemType)
-					elements.Slice(i, i+1).Set(allocatedElement)
+					if err = reflectAnnotatedFields(fieldPart, recordfield, timezone, isHeader); err != nil {
+						return errors.New(fmt.Sprintf("Unrecognized time format <%s>", fieldPart))
+					}
 				*/
-
-				fmt.Print(i, fieldPart)
 			}
-
-			fmt.Print(fieldParts)
 			/*
 						for {
 							allocatedElement := reflect.New(innerStructureType)
@@ -466,6 +465,10 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 	}
 
 	return nil
+}
+
+func getTypeArray(arr interface{}) reflect.Type {
+	return reflect.TypeOf(arr).Elem()
 }
 
 // Translating the annotation of a field to field, index/repeat, component
