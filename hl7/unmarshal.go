@@ -361,23 +361,6 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 			} else {
 				return err
 			}
-
-			/*
-				TODO: this annotation got removed because it doesnt help to have open arrays
-				case "slice":
-				 instr := fields[mapFieldNo]
-				list := splitAny(instr, RepeatDelimiter) //CHANGEHERE
-				field.Set(reflect.ValueOf(list))
-				/*	case [][]string:
-					fieldFromFile := fields[mapFieldNo]
-					// the amount of repeat-separators is the first dimension, then each repeats the patters
-					arry := make([][]string, 0)
-					sequences := strings.Split(fieldFromFile, "\\")
-					for _, sequence := range sequences {
-						data := strings.Split(sequence, "^")
-						arry = append(arry, data)
-					}
-					field.Set(reflect.ValueOf(arry)) */
 		case reflect.Struct:
 			// TODO: check the package of the "Time" because it can be an another "Time" package too
 			switch reflect.TypeOf(recordfield.Interface()).Name() {
@@ -416,48 +399,18 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 		case reflect.Slice:
 			fieldParts := strings.Split(inputFields[currentInputFieldNo], RepeatDelimiter)
 			elementCount := len(fieldParts)
+			if elementCount == 0 {
+				continue
+			}
+
 			elemType := getTypeArray(recordfield.Interface())
-			elements := reflect.MakeSlice(reflect.SliceOf(elemType), elementCount, elementCount)
+			recordfield = reflect.MakeSlice(reflect.SliceOf(elemType), elementCount, elementCount)
 
 			for i, fieldPart := range fieldParts {
-				// TODO: add new string array to the return
-				elements.Index(i).SetString(fieldPart)
-				fmt.Println("Stored string:", elements.Index(i))
-				/*
-					if err = reflectAnnotatedFields(fieldPart, recordfield, timezone, isHeader); err != nil {
-						return errors.New(fmt.Sprintf("Unrecognized time format <%s>", fieldPart))
-					}
-				*/
+				recordfield.Index(i).Set(reflect.ValueOf(fieldPart))
 			}
-			/*
-						for {
-							allocatedElement := reflect.New(innerStructureType)
-							var err error
-							var retv RETV
-							currentInputLine, retv, err = reflectInputToStruct(bufferedInputLines, depth+1,
-								currentInputLine, allocatedElement.Interface(), enc, tz)
-							if err != nil {
-								if retv == UNEXPECTED {
-									if depth > 0 {
-										// if nested structures abort due to unexpected records that does not create an error
-										// as the parse will be continued one level higher
-										break
-									} else {
-										return currentInputLine, ERROR, err
-									}
-								}
-								if retv == ERROR { // a serious error ends the processing
-									return currentInputLine, ERROR, err
-								}
-							}
-
-							sliceForNestedStructure = reflect.Append(sliceForNestedStructure, allocatedElement.Elem())
-							reflect.ValueOf(targetStruct).Elem().Field(i).Set(sliceForNestedStructure)
-						}
-				//inputFieldValue := inputFields[currentInputFieldNo]
-				//var inputFieldValueParts []string
-				inputFieldValueParts = strings.Split(inputFieldValue, RepeatDelimiter)
-			*/
+			record.Field(j).Set(recordfield)
+			break
 
 		default:
 			return errors.New(fmt.Sprintf("Invalid field-Type '%s' for field '%s", reflect.TypeOf(recordfield.Interface()).Kind(), record.Field(j).Type().Name()))
