@@ -48,7 +48,7 @@ func Test_Parse_MSH_Record(t *testing.T) {
 
 func Test_Parse_PID_Record(t *testing.T) {
 	fileData := `MSH|^~\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\r
-	PID|1||00100M56016||Smith^Harry||19500412|M\r`
+PID|1||00100M56016||Smith^Harry||19500412|M\r`
 
 	var message hl7v23.ORM_001
 	err := hl7.Unmarshal(
@@ -59,14 +59,15 @@ func Test_Parse_PID_Record(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	// TODO: add PID asserts here
-	// assert.NotNil(t, message.Patient)
+	assert.NotNil(t, message.Patient)
+	assert.Equal(t, "1", message.Patient.PatientIdentification.ID)
+	// TODO: add other PID asserts here
 }
 
 func Test_Parse_ORC_Record(t *testing.T) {
 	fileData := `MSH|^~\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\r
-	PID|1||00100M56016||Smith^Harry||19500412|M\r
-	ORC|NW|000218T018|||||^^^^^R||20110926120055\r`
+PID|1||00100M56016||Smith^Harry||19500412|M\r
+ORC|NW|000218T018|||||^^^^^R||20110926120055\r`
 
 	var message hl7v23.ORM_001
 	err := hl7.Unmarshal(
@@ -82,9 +83,9 @@ func Test_Parse_ORC_Record(t *testing.T) {
 
 func Test_Parse_OBR_Record(t *testing.T) {
 	fileData := `MSH|^~\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\r
-	PID|1||00100M56016||Smith^Harry||19500412|M\r
-	ORC|NW|000218T018|||||^^^^^R||20110926120055\r
-	OBR|1|000218T018||101~102||20110926120000|||||A||||\r`
+PID|1||00100M56016||Smith^Harry||19500412|M\r
+ORC|NW|000218T018|||||^^^^^R||20110926120055\r
+OBR|1|000218T018||101~102||20110926120000|||||A||||\r`
 
 	var message hl7v23.ORM_001
 	err := hl7.Unmarshal(
