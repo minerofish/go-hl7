@@ -406,6 +406,7 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 			elemType := getTypeArray(recordfield.Interface())
 			recordfield = reflect.MakeSlice(reflect.SliceOf(elemType), elementCount, elementCount)
 
+			// TODO: add nested object support
 			for i, fieldPart := range fieldParts {
 				recordfield.Index(i).Set(reflect.ValueOf(fieldPart))
 			}
