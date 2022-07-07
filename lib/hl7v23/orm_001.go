@@ -47,11 +47,6 @@ type ORM_001 struct {
 	*/
 }
 
-//  PV1 - Patient visit
-// https://hl7-definition.caristix.com/v2/HL7v2.3/Segments/PV1
-type PV1 struct {
-}
-
 type PV2 struct {
 }
 

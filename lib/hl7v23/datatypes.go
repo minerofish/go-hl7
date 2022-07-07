@@ -1,5 +1,7 @@
 package hl7v23
 
+import "time"
+
 // Extended Composite ID With Check Digit
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CX
 type CX23 struct {
@@ -97,3 +99,28 @@ const (
 	Other   Sex = "O"
 	Unknown Sex = "U"
 )
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/PL
+type PL struct {
+	PointOfCare        string `hl7:"0.1"`
+	Room               string `hl7:"0.2"`
+	Bed                string `hl7:"0.3"`
+	Facility           HD23   `hl7:"0.4"`
+	LocationStatus     string `hl7:"0.5"`
+	PersonLocationType string `hl7:"0.6"`
+	Building           string `hl7:"0.7"`
+	Floor              string `hl7:"0.8"`
+	LocationType       string `hl7:"0.9"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_DLD
+type CM_DLD struct {
+	DischargeLocation string    `hl7:"0.1"`
+	EffectiveDate     time.Time `hl7:"0.2"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/FC
+type FC struct {
+	FinancialClass string    `hl7:"0.1"`
+	EffectiveDate  time.Time `hl7:"0.2"`
+}
