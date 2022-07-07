@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Parse_MSH_Record(t *testing.T) {
+func Test_Parse_MSH_Segment(t *testing.T) {
 	fileData := fmt.Sprintf("MSH|^~\\&|HL7_Host^b^c|HL7_Office^^|CIT^^|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1~second_element|<\u000d")
 
 	var message hl7v23.ORM_001
@@ -46,7 +46,7 @@ func Test_Parse_MSH_Record(t *testing.T) {
 	assert.Equal(t, "<", message.MSH.PrincipalLanguageOfMessage.Identifier)
 }
 
-func Test_Parse_PID_Record(t *testing.T) {
+func Test_Parse_PID_Segment(t *testing.T) {
 	fileData := `MSH|^~\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\r
 PID|1||00100M56016||Smith^Harry||19500412|M\r`
 
@@ -64,7 +64,7 @@ PID|1||00100M56016||Smith^Harry||19500412|M\r`
 	// TODO: add other PID asserts here
 }
 
-func Test_Parse_ORC_Record(t *testing.T) {
+func Test_Parse_ORC_Segment(t *testing.T) {
 	fileData := `MSH|^~\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\r
 PID|1||00100M56016||Smith^Harry||19500412|M\r
 ORC|NW|000218T018|||||^^^^^R||20110926120055\r`
@@ -81,7 +81,7 @@ ORC|NW|000218T018|||||^^^^^R||20110926120055\r`
 	// TODO: add ORC asserts here
 }
 
-func Test_Parse_OBR_Record(t *testing.T) {
+func Test_Parse_OBR_Segment(t *testing.T) {
 	fileData := `MSH|^~\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\r
 PID|1||00100M56016||Smith^Harry||19500412|M\r
 ORC|NW|000218T018|||||^^^^^R||20110926120055\r
