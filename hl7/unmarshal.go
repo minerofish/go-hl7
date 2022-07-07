@@ -97,6 +97,8 @@ const (
 	ERROR      RETV = 3 // a definite error that stops the process
 )
 
+// HL7 delimimters
+// https://blog.interfaceware.com/hl7-delimiter-redefinitions/
 var (
 	FieldDelimiter     = "|"
 	RepeatDelimiter    = "\\"
