@@ -99,6 +99,37 @@ type CM_AUI struct {
 	Source              string    `hl7:"0.3"`
 }
 
+// CM_RMC - Room Coverage
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_RMC
+type CM_RMC struct {
+	RoomType       string  `hl7:"0.1"`
+	AmmountType    string  `hl7:"0.2"`
+	CoverageAmount float32 `hl7:"0.3"`
+}
+
+// CM_PTA - Policy Type
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_PTA
+type CM_PTA struct {
+	PolicyType  string  `hl7:"0.1"`
+	AmountClass string  `hl7:"0.2"`
+	Amount      float32 `hl7:"0.3"`
+}
+
+// CM_DDI - Daily Deductible
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_DDI
+type CM_DDI struct {
+	DelayDays    float32 `hl7:"0.1"`
+	Amount       float32 `hl7:"0.2"`
+	NumberOfDays float32 `hl7:"0.3"`
+}
+
+// JCC - Job Code Class
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/JCC
+type JCC struct {
+	JobCode  string `hl7:"0.1"`
+	JobClass string `hl7:"0.2"`
+}
+
 // HL7 v2.3 - CP - Composite Price
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CP
 type CP struct {
