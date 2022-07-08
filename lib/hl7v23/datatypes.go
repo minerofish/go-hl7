@@ -315,3 +315,25 @@ type EI struct {
 	UniversalId      string `hl7:"2"`
 	UniversalIdType  string `hl7:"3"`
 }
+
+// CM_PEN - Penalty
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_PEN
+type CM_PEN struct {
+	PenaltyType   string  `hl7:"0"`
+	PenaltyAmount float32 `hl7:"1"`
+}
+
+// CM_DTN - Day Type And Number
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_DTN
+type CM_DTN struct {
+	DayType      string  `hl7:"0"`
+	NumberOfDays float32 `hl7:"1"`
+}
+
+// CM_PCF - Pre-certification Required
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_PCF
+type CM_PCF struct {
+	PreCertificationPatient  string `hl7:"0"`
+	PreCertificationRequired string `hl7:"1"`
+	PreCertificationWindow   string `hl7:"2"`
+}

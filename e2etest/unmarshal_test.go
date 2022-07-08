@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/DRK-Blutspende-BaWueHe/go-hl7/hl7"
+	"github.com/DRK-Blutspende-BaWueHe/go-hl7"
 	"github.com/DRK-Blutspende-BaWueHe/go-hl7/lib/hl7v23"
 	"github.com/stretchr/testify/assert"
 )
@@ -67,9 +67,10 @@ func Test_Parse_PID_Segment(t *testing.T) {
 	assert.Equal(t, "", message.Patient.PatientIdentification.ExternalID[1].Id)
 	assert.Equal(t, "c", message.Patient.PatientIdentification.ExternalID[1].CheckDigit)
 	assert.Equal(t, "", message.Patient.PatientIdentification.ExternalID[1].AssigningAuthority)
-	assert.Equal(t, "a", message.Patient.PatientIdentification.ExternalID[0].CodeIdentifyingTheCheckDigitSchemeEmployed.NamespaceId)
-	assert.Equal(t, "b", message.Patient.PatientIdentification.ExternalID[0].CodeIdentifyingTheCheckDigitSchemeEmployed.UniversalId)
-	assert.Equal(t, "", message.Patient.PatientIdentification.ExternalID[0].CodeIdentifyingTheCheckDigitSchemeEmployed.UniversalIdType)
+	assert.Equal(t, "a", message.Patient.PatientIdentification.ExternalID[0].Id)
+	assert.Equal(t, "b", message.Patient.PatientIdentification.ExternalID[0].CheckDigit)
+	assert.Equal(t, "", message.Patient.PatientIdentification.ExternalID[1].Id)
+	assert.Equal(t, "c", message.Patient.PatientIdentification.ExternalID[1].CheckDigit)
 	assert.Equal(t, "00100M56016", message.Patient.PatientIdentification.InternalID[0].Id)
 	assert.Equal(t, "", message.Patient.PatientIdentification.AlternateID[0].Id)
 	assert.Equal(t, "Smith", message.Patient.PatientIdentification.Name.FamilyName)
