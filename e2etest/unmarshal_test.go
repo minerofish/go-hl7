@@ -83,7 +83,7 @@ func Test_Parse_PID_Segment(t *testing.T) {
 func Test_Parse_ORC_Segment(t *testing.T) {
 	fileData := fmt.Sprintf("MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\u000d")
 	fileData = fileData + fmt.Sprintf("PID|1|a^b~^c|00100M56016||Smith^Harry||19500412|M\u000d")
-	fileData = fileData + fmt.Sprintf("ORC|NW|000218T018|||||^^^^^R||20110926120055\u000d")
+	fileData = fileData + fmt.Sprintf("ORC|NW|000218T018||||Not used|^^^^^R||20110926120055\u000d")
 
 	var message hl7v23.ORM_001
 	err := hl7.Unmarshal(
@@ -95,6 +95,19 @@ func Test_Parse_ORC_Segment(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, message.Order)
 	assert.NotNil(t, message.Order.CommondOrderSegment)
+	assert.Equal(t, "NW", message.Order.CommondOrderSegment.OrderControl)
+	assert.Equal(t, "000218T018", message.Order.CommondOrderSegment.PlacerOrderNumber.EntityIdentifier)
+	assert.Equal(t, "", message.Order.CommondOrderSegment.PlacerOrderNumber.NamespaceId)
+	assert.Equal(t, "", message.Order.CommondOrderSegment.PlacerOrderNumber.UniversalId)
+	assert.Equal(t, "", message.Order.CommondOrderSegment.PlacerOrderNumber.UniversalIdType)
+	assert.Equal(t, "", message.Order.CommondOrderSegment.FillerOrderNumber.EntityIdentifier)
+	assert.Equal(t, "", message.Order.CommondOrderSegment.PlacerGroupNumber.EntityIdentifier)
+	assert.Equal(t, "", message.Order.CommondOrderSegment.OrderStatus)
+	assert.Equal(t, "Not used", message.Order.CommondOrderSegment.ResponseFlag)
+	assert.Equal(t, "", message.Order.CommondOrderSegment.QuantityTiming) // TODO: fix it
+	assert.Equal(t, "", message.Order.CommondOrderSegment.ParentOrder.ParentsPlacerOrderNumber)
+	assert.Equal(t, "", message.Order.CommondOrderSegment.ParentOrder.ParentsFillerOrderNumber)
+	assert.Equal(t, "2011-09-26 10:00:55 +0000 UTC", message.Order.CommondOrderSegment.DateTimeOfTransaction.String())
 }
 
 func Test_Parse_OBR_Segment(t *testing.T) {
