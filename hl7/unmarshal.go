@@ -12,6 +12,16 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
+// HL7 Format delimiters
+// https://blog.interfaceware.com/hl7-delimiter-redefinitions/
+type Delimiters struct {
+	Composite string
+	Sub       string
+	SubSub    string
+	Repeat    string
+	Escape    string
+}
+
 func Unmarshal(messageData []byte, targetStruct interface{}, enc Encoding, tz Timezone) error {
 	var (
 		messageBytes []byte
@@ -60,6 +70,7 @@ func Unmarshal(messageData []byte, targetStruct interface{}, enc Encoding, tz Ti
 	if len(bufferedInputLines) <= 1 {                                               // if it was not possible to break with non-standard 0x0a line-break try 0d (standard)
 		bufferedInputLines = strings.Split(string(messageBytes), string([]byte{0x0D}))
 	}
+
 	// strip the remaining 0A and 0D Linefeed at the end
 	for i := 0; i < len(bufferedInputLines); i++ {
 		// 0d,0a then again as there have been files observed which had 0a0d (0d0a would be normal)
@@ -70,8 +81,23 @@ func Unmarshal(messageData []byte, targetStruct interface{}, enc Encoding, tz Ti
 		fmt.Println(">", bufferedInputLines[i])
 	}
 
-	_, _, err = reflectInputToStruct(bufferedInputLines, 1 /*recursion-depth*/, 0 /*current line*/, targetStruct, enc, tz)
-	if err != nil {
+	var delimiters Delimiters
+
+	delimiters.Composite = "|"
+	delimiters.Sub = "^"
+	delimiters.SubSub = "&"
+	delimiters.Repeat = "~"
+	delimiters.Escape = "\\"
+
+	if bufferedInputLines[0][0:3] == "MSH" {
+		delimiters.Composite = bufferedInputLines[0][3:4] // Default |
+		delimiters.Sub = bufferedInputLines[0][4:5]       // Default ^
+		delimiters.SubSub = bufferedInputLines[0][5:6]    // Default &
+		delimiters.Repeat = bufferedInputLines[0][6:7]    // Default ~
+		delimiters.Escape = bufferedInputLines[0][7:8]    // Default \
+	}
+
+	if _, _, err = ParseStruct(bufferedInputLines, 1 /*recursion*/, 0 /*line*/, targetStruct, enc, tz, delimiters); err != nil {
 		return err
 	}
 
@@ -97,17 +123,10 @@ const (
 	ERROR      RETV = 3 // a definite error that stops the process
 )
 
-// HL7 delimimters
+// HL7 delimimters (default, rewritten at startup)
 // https://blog.interfaceware.com/hl7-delimiter-redefinitions/
-var (
-	FieldDelimiter     = "|"
-	RepeatDelimiter    = "\\"
-	ComponentDelimiter = "^"
-	EscapeDelimiter    = "&"
-)
-
-/* This function takes a string and a struct and matches the annotated fields to the string-input */
-func reflectInputToStruct(bufferedInputLines []string, depth int, currentInputLine int, targetStruct interface{}, enc Encoding, tz Timezone) (int, RETV, error) {
+// This function takes a string and a struct and matches the annotated fields to the string-input
+func ParseStruct(bufferedInputLines []string, depth int, currentInputLine int, targetStruct interface{}, enc Encoding, tz Timezone, delimiters Delimiters) (int, RETV, error) {
 
 	timeLocation, err := time.LoadLocation(string(tz))
 	if err != nil {
@@ -124,14 +143,13 @@ func reflectInputToStruct(bufferedInputLines []string, depth int, currentInputLi
 		hl7 := ftype.Tag.Get("hl7")
 		tagsList := removeEmptyStrings(strings.Split(hl7, ","))
 
-		// if it is not annotated
-		if len(tagsList) < 1 {
+		if len(tagsList) < 1 { // if it is not annotated at all its a "struct or a slice of structs to group records"
+
 			switch currentRecord.Kind() {
 			case reflect.Struct:
 				var err error
 				var retv RETV
-
-				currentInputLine, retv, err = reflectInputToStruct(bufferedInputLines, depth+1, currentInputLine, currentRecord.Addr().Interface(), enc, tz)
+				currentInputLine, retv, err = ParseStruct(bufferedInputLines, depth+1, currentInputLine, currentRecord.Addr().Interface(), enc, tz, delimiters)
 				if err != nil {
 					if retv == UNEXPECTED {
 						if depth > 0 {
@@ -146,55 +164,44 @@ func reflectInputToStruct(bufferedInputLines []string, depth int, currentInputLi
 						return currentInputLine, ERROR, err
 					}
 				}
-				break
 
 			case reflect.Slice:
-				panic("Slice is not implemented yet!")
-				// break
-			}
+				// Not annotated array. If it's a struct have to recurse, otherwise skip
+				if targetStructType.Field(i).Type.Kind() == reflect.Slice {
+					// Array of Structs
+					if reflect.TypeOf(targetStructValue.Interface()).Kind() == reflect.Struct {
+						innerStructureType := targetStructType.Field(i).Type.Elem()
 
-			continue
-		}
+						sliceForNestedStructure := reflect.MakeSlice(targetStructType.Field(i).Type, 0, 0)
 
-		fmt.Println("Looking for ", hl7)
-		// no annotation after hl:.. provided means a nested array with more records or ignore
-		if len(tagsList[0]) < 1 {
-
-			// Not annotated array. If it's a struct have to recurse, otherwise skip
-			if targetStructType.Field(i).Type.Kind() == reflect.Slice {
-				// Array of Structs
-				if reflect.TypeOf(targetStructValue.Interface()).Kind() == reflect.Struct {
-					innerStructureType := targetStructType.Field(i).Type.Elem()
-
-					sliceForNestedStructure := reflect.MakeSlice(targetStructType.Field(i).Type, 0, 0)
-
-					for {
-						allocatedElement := reflect.New(innerStructureType)
-						var err error
-						var retv RETV
-						currentInputLine, retv, err = reflectInputToStruct(bufferedInputLines, depth+1,
-							currentInputLine, allocatedElement.Interface(), enc, tz)
-						if err != nil {
-							if retv == UNEXPECTED {
-								if depth > 0 {
-									// if nested structures abort due to unexpected records that does not create an error
-									// as the parse will be continued one level higher
-									break
-								} else {
+						for {
+							allocatedElement := reflect.New(innerStructureType)
+							var err error
+							var retv RETV
+							currentInputLine, retv, err = ParseStruct(bufferedInputLines, depth+1,
+								currentInputLine, allocatedElement.Interface(), enc, tz, delimiters)
+							if err != nil {
+								if retv == UNEXPECTED {
+									if depth > 0 {
+										// if nested structures abort due to unexpected records that does not create an error
+										// as the parse will be continued one level higher
+										break
+									} else {
+										return currentInputLine, ERROR, err
+									}
+								}
+								if retv == ERROR { // a serious error ends the processing
 									return currentInputLine, ERROR, err
 								}
 							}
-							if retv == ERROR { // a serious error ends the processing
-								return currentInputLine, ERROR, err
-							}
-						}
 
-						sliceForNestedStructure = reflect.Append(sliceForNestedStructure, allocatedElement.Elem())
-						reflect.ValueOf(targetStruct).Elem().Field(i).Set(sliceForNestedStructure)
+							sliceForNestedStructure = reflect.Append(sliceForNestedStructure, allocatedElement.Elem())
+							reflect.ValueOf(targetStruct).Elem().Field(i).Set(sliceForNestedStructure)
+						}
 					}
-					continue
 				}
 			}
+
 			continue
 		}
 
@@ -205,28 +212,21 @@ func reflectInputToStruct(bufferedInputLines []string, depth int, currentInputLi
 		}
 
 		if len(bufferedInputLines[currentInputLine]) == 0 {
-			continue // empty lines can only be skipped
-		}
-
-		// headers require delimiters to be disregarded
-		isHeader := false
-		if bufferedInputLines[currentInputLine][0:3] == "MSH" {
-			isHeader = true
+			continue // skip empty line
 		}
 
 		if expectInputRecordType == bufferedInputLines[currentInputLine][0:3] {
 
-			fmt.Println("scanning ", expectInputRecordType)
-
-			//Special case: its not an anotated record, it is an array of annotated records here :
+			// Array of Segments
 			if currentRecord.Kind() == reflect.Slice {
+
 				innerStructureType := targetStructType.Field(i).Type.Elem()
 				sliceForNestedStructure := reflect.MakeSlice(targetStructType.Field(i).Type, 0, 0)
 				for { // iterate for as long as the same type repeats
 					allocatedElement := reflect.New(innerStructureType)
 
-					if err = reflectAnnotatedFields(bufferedInputLines[currentInputLine], allocatedElement.Elem(), timeLocation, isHeader); err != nil {
-						return currentInputLine, ERROR, fmt.Errorf("Failed to process input line '%s' err:%w", bufferedInputLines[currentInputLine], err)
+					if err = parseSegment(bufferedInputLines[currentInputLine], 0 /*subdepth=0*/, allocatedElement.Elem(), timeLocation, delimiters); err != nil {
+						return currentInputLine, ERROR, fmt.Errorf("failed to process input line '%s' err:%w", bufferedInputLines[currentInputLine], err)
 					}
 
 					sliceForNestedStructure = reflect.Append(sliceForNestedStructure, allocatedElement.Elem())
@@ -242,22 +242,25 @@ func reflectInputToStruct(bufferedInputLines []string, depth int, currentInputLi
 					}
 				}
 
-			} else { // The "normal" case: scanning a string into a structure :
-				if err = reflectAnnotatedFields(bufferedInputLines[currentInputLine], currentRecord, timeLocation, isHeader); err != nil {
+			} else {
+
+				if err = parseSegment(bufferedInputLines[currentInputLine], 0 /*subdepth=0*/, currentRecord, timeLocation, delimiters); err != nil {
 					return currentInputLine, ERROR, fmt.Errorf("failed to process input line '%s' err:%w", bufferedInputLines[currentInputLine], err)
 				}
 				currentInputLine = currentInputLine + 1
 			}
 
 		} else { // The expected input-record did not occur
+
 			if expectedInputRecordTypeOptional {
 				continue // skipping optional record instead of an error
 			} else {
 				return currentInputLine, UNEXPECTED, fmt.Errorf("expected Record-Type '%s' input was '%s' in depth (%d) (Abort)", expectInputRecordType, bufferedInputLines[currentInputLine][0:3], depth)
 			}
+
 		}
 
-		if currentInputLine >= len(bufferedInputLines) {
+		if currentInputLine >= len(bufferedInputLines) { // EOF ?
 			break
 		}
 	}
@@ -265,30 +268,48 @@ func reflectInputToStruct(bufferedInputLines []string, depth int, currentInputLi
 	return currentInputLine, OK, nil
 }
 
-func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *time.Location, isHeader bool) error {
+func parseSegment(inputStr string, subdepth int, record reflect.Value, timezone *time.Location, delimiters Delimiters) error {
+
+	delimiterBySubDepth := ""
+	nextDelimiterBySubDepth := ""
+	switch subdepth {
+	case 0:
+		delimiterBySubDepth = delimiters.Composite
+		nextDelimiterBySubDepth = delimiters.Sub
+	case 1:
+		delimiterBySubDepth = delimiters.Sub
+		nextDelimiterBySubDepth = delimiters.SubSub
+	case 2:
+		delimiterBySubDepth = delimiters.SubSub
+	}
+
+	fmt.Printf("  Segment(%s: %d,%s) '%s'\n", record.Type().Name(), subdepth, delimiterBySubDepth, inputStr)
 
 	if reflect.ValueOf(record).Type().Kind() != reflect.Struct {
 		return fmt.Errorf("invalid type of target: '%s', expecting 'struct'", reflect.ValueOf(record).Type().Kind())
 	}
 
-	inputFields := strings.Split(inputStr, FieldDelimiter)
+	inputFields := strings.Split(inputStr, delimiterBySubDepth)
 	if len(inputFields) < 1 {
-		return errors.New("Input contains no data")
+		return fmt.Errorf("input contains no data or can not be split %s", inputStr)
 	}
 
 	for j := 0; j < record.NumField(); j++ {
-		recordfield := record.Field(j)
-		if !recordfield.CanInterface() {
-			return errors.New(fmt.Sprintf("Field %s is not exported - aborting import", recordfield.Type().Name()))
-		}
-		recordFieldInterface := recordfield.Addr().Interface()
 
-		hasOverrideDelimiterAnnotation := false
-		inputIsRequired := false
+		recordfield := record.Field(j)
+
 		hl7Tag := record.Type().Field(j).Tag.Get("hl7")
 		if hl7Tag == "" {
 			continue // nothing to process when someone requires astm:
 		}
+
+		if !recordfield.CanInterface() {
+			return fmt.Errorf("field %s is not exported - aborting import", recordfield.Type().Name())
+		}
+		recordFieldInterface := recordfield.Addr().Interface()
+
+		hasOverrideDelimiterAnnotation := false
+
 		hl7TagsList := strings.Split(hl7Tag, ",")
 		for i := 0; i < len(hl7TagsList); i++ {
 			hl7TagsList[i] = strings.Trim(hl7TagsList[i], " ")
@@ -297,58 +318,45 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 			// the delimiter is instantly replaced with the delimiters from the file for further parsing. By default that is "\^&"
 			hasOverrideDelimiterAnnotation = true
 		}
-		if sliceContainsString(hl7TagsList, ANNOTATION_REQUIRED) {
-			inputIsRequired = true
-		}
-		currentInputFieldNo, repeat, component, err := readFieldAddressAnnotation(hl7TagsList[0])
+
+		inputIsRequired := false
+
+		addr_component, addr_repeat, addr_subcomponent, err := readFieldAddressAnnotation(hl7TagsList[0])
 		if err != nil {
-			return errors.New(fmt.Sprintf("Invalid annotation for field %s. (%s)", record.Type().Field(j).Name, err))
+			return fmt.Errorf("invalid annotation for field %s. (%w)", record.Type().Field(j).Name, err)
 		}
-		if currentInputFieldNo >= len(inputFields) || currentInputFieldNo < 0 {
-			//TODO: user should be able to toggle wether he wants an exact match = error or bestfit = skip silent
-			continue // mapped field is beyond the data
+		if addr_component >= len(inputFields) || addr_component < 0 {
+			continue // mapped field is beyond the data (not an error)
 		}
 
 		switch reflect.TypeOf(recordfield.Interface()).Kind() {
 		case reflect.String:
-			if value, err := extractAstmFieldByRepeatAndComponent(inputFields[currentInputFieldNo], repeat, component); err == nil {
 
-				// in headers there can be special characters, that is why the value needs to disregard the delimiters:
-				if isHeader && hasOverrideDelimiterAnnotation {
-					value = inputFields[currentInputFieldNo]
-				}
+			if sliceContainsString(hl7TagsList, ANNOTATION_DELIMITER) {
+				// The delimiter Field itself would be pointless to cut with delimiters :)
+				reflect.ValueOf(recordFieldInterface).Elem().SetString(inputFields[addr_component])
+			} else if value, err := extractFieldByRepeatAndComponent(inputFields[addr_component], nextDelimiterBySubDepth, delimiters.Repeat, addr_repeat, addr_subcomponent); err == nil {
 
+				fmt.Printf("    %s = '%s'\n", recordfield.Type().Name(), value)
 				reflect.ValueOf(recordFieldInterface).Elem().Set(reflect.ValueOf(value))
-
-				if hasOverrideDelimiterAnnotation { // the first three characters become the new delimiters
-					if len(value) >= 1 {
-						RepeatDelimiter = value[1:2]
-					}
-					if len(value) >= 2 {
-						ComponentDelimiter = value[0:1]
-					}
-					if len(value) >= 3 {
-						EscapeDelimiter = value[2:3]
-					}
-				}
 			} else {
 				if inputIsRequired { // by default we ignore missing input
-					return errors.New(fmt.Sprintf("Failed to extract index (%d.%d.%d) from input line '%s' : (%s)",
-						currentInputFieldNo+1, repeat+1, component+1, inputStr, err))
+					return fmt.Errorf("failed to extract index (%d.%d.%d) from input line '%s' : (%w)",
+						addr_component+1, addr_repeat+1, addr_subcomponent+1, inputStr, err)
 				}
 			}
 		case reflect.Int:
 			if hasOverrideDelimiterAnnotation {
-				return errors.New("delimiter-annotation is only allowed for string-type, not int.")
+				return errors.New("delimiter-annotation is only allowed for string-type, not int")
 			}
 
-			if value, err := extractAstmFieldByRepeatAndComponent(inputFields[currentInputFieldNo], repeat, component); err == nil {
+			if value, err := extractFieldByRepeatAndComponent(inputFields[addr_component], nextDelimiterBySubDepth, delimiters.Repeat, addr_repeat, addr_subcomponent); err == nil {
 
 				if num, err := strconv.Atoi(value); err == nil {
 					reflect.ValueOf(recordFieldInterface).Elem().Set(reflect.ValueOf(num))
 				} else {
 					if inputIsRequired { // by default we ignore missing input
-						return errors.New(fmt.Sprintf("Failed to extract index (%d,%d) from field %s(%s)", repeat, component, inputFields[currentInputFieldNo], err))
+						return fmt.Errorf("failed to extract index (%d,%d) from field %s(%s)", addr_repeat, addr_subcomponent, inputFields[addr_component], err)
 					}
 				}
 
@@ -357,34 +365,33 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 			}
 		case reflect.Float32:
 			if hasOverrideDelimiterAnnotation {
-				return errors.New("delimiter-annotation is only allowed for string-type, not int.")
+				return fmt.Errorf("delimiter-annotation is only allowed for string-type, not int")
 			}
 
-			if value, err := extractAstmFieldByRepeatAndComponent(inputFields[currentInputFieldNo], repeat, component); err == nil {
-
+			if value, err := extractFieldByRepeatAndComponent(inputFields[addr_component], nextDelimiterBySubDepth, delimiters.Repeat, addr_repeat, addr_subcomponent); err == nil {
 				if num, err := strconv.ParseFloat(value, 32); err == nil {
 					reflect.ValueOf(recordFieldInterface).Elem().Set(reflect.ValueOf(float32(num)))
 				} else {
 					if inputIsRequired { // by default we ignore missing input
-						return errors.New(fmt.Sprintf("Failed to extract index (%d,%d) from field %s(%s)", repeat, component, inputFields[currentInputFieldNo], err))
+						return fmt.Errorf("failed to extract index (%d,%d) from field %s(%w)", addr_repeat, addr_subcomponent, inputFields[addr_component], err)
 					}
 				}
-
 			} else {
 				return err
 			}
+
 		case reflect.Float64:
 			if hasOverrideDelimiterAnnotation {
-				return errors.New("delimiter-annotation is only allowed for string-type, not int.")
+				return fmt.Errorf("delimiter-annotation is only allowed for string-type, not int")
 			}
 
-			if value, err := extractAstmFieldByRepeatAndComponent(inputFields[currentInputFieldNo], repeat, component); err == nil {
+			if value, err := extractFieldByRepeatAndComponent(inputFields[addr_component], nextDelimiterBySubDepth, delimiters.Repeat, addr_repeat, addr_subcomponent); err == nil {
 
 				if num, err := strconv.ParseFloat(value, 64); err == nil {
 					reflect.ValueOf(recordFieldInterface).Elem().Set(reflect.ValueOf(float64(num)))
 				} else {
 					if inputIsRequired { // by default we ignore missing input
-						return errors.New(fmt.Sprintf("Failed to extract index (%d,%d) from field %s(%s)", repeat, component, inputFields[currentInputFieldNo], err))
+						return fmt.Errorf("failed to extract index (%d,%d) from field %s(%s)", addr_repeat, addr_subcomponent, inputFields[addr_component], err)
 					}
 				}
 
@@ -398,36 +405,37 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 				if hasOverrideDelimiterAnnotation {
 					return errors.New("delimiter-annotation is only allowed for string-type, not Time")
 				}
-				inputFieldValue := inputFields[currentInputFieldNo]
+				inputFieldValue := inputFields[addr_component]
 				if inputFieldValue == "" {
 					reflect.ValueOf(recordFieldInterface).Elem().Set(reflect.ValueOf(time.Time{}))
 				} else if len(inputFieldValue) == 8 { // YYYYMMDD See Section 5.6.2 https://samson-rus.com/wp-content/files/LIS2-A2.pdf
 					timeInLocation, err := time.ParseInLocation("20060102", inputFieldValue, timezone)
 					if err != nil {
-						return errors.New(fmt.Sprintf("Invalid time format <%s>", inputFieldValue))
+						return fmt.Errorf("invalid time format <%s>", inputFieldValue)
 					}
 					reflect.ValueOf(recordFieldInterface).Elem().Set(reflect.ValueOf(timeInLocation))
 
 				} else if len(inputFieldValue) == 14 { // YYYYMMDDHHMMSS
 					timeInLocation, err := time.ParseInLocation("20060102150405", inputFieldValue, timezone)
 					if err != nil {
-						return errors.New(fmt.Sprintf("Invalid time format <%s>", inputFieldValue))
+						return fmt.Errorf("invalid time format <%s>", inputFieldValue)
 					}
 					reflect.ValueOf(recordFieldInterface).Elem().Set(reflect.ValueOf(timeInLocation.UTC()))
 				} else {
-					return errors.New(fmt.Sprintf("Unrecognized time format <%s>", inputFieldValue))
+					return fmt.Errorf("unrecognized time format <%s>", inputFieldValue)
 				}
-				break
+
 			default:
-				inputFieldValue := inputFields[currentInputFieldNo]
-				if err = reflectAnnotatedFields(inputFieldValue, recordfield, timezone, isHeader); err != nil {
+
+				inputFieldValue := inputFields[addr_component]
+				if err = parseSegment(inputFieldValue, subdepth+1, recordfield, timezone, delimiters); err != nil {
 					return err
 				}
-				break
+
 			}
 
 		case reflect.Slice:
-			fieldParts := strings.Split(inputFields[currentInputFieldNo], RepeatDelimiter)
+			fieldParts := strings.Split(inputFields[addr_component], delimiters.Repeat)
 			elementCount := len(fieldParts)
 			if elementCount == 0 {
 				continue
@@ -436,33 +444,27 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 			elemType := getTypeArray(recordfield.Interface())
 			recordfield = reflect.MakeSlice(reflect.SliceOf(elemType), elementCount, elementCount)
 
-			// if it is an object of the array
 			if elemType.Kind() == reflect.Struct {
+				// if it is an object of the array
 				for i, fieldPart := range fieldParts {
-					if err = reflectAnnotatedFields(fieldPart, recordfield.Index(i), timezone, isHeader); err != nil {
-						return errors.New(fmt.Sprintf("Unrecognized time format <%s>", fieldPart))
+					if err = parseSegment(fieldPart, subdepth+1, recordfield.Index(i), timezone, delimiters); err != nil {
+						return fmt.Errorf("unrecognized time format <%s>", fieldPart)
 					}
 				}
 			} else {
-				// else its an array of prmitive types
+				// its an array of prmitive types
 				for i, fieldPart := range fieldParts {
 					recordfield.Index(i).Set(reflect.ValueOf(fieldPart))
 				}
 			}
 			record.Field(j).Set(recordfield)
 
-			break
-
 		default:
-			return errors.New(fmt.Sprintf("Invalid field-Type '%s' for field '%s", reflect.TypeOf(recordfield.Interface()).Kind(), record.Field(j).Type().Name()))
+			return fmt.Errorf("invalid field-Type '%s' for field '%s", reflect.TypeOf(recordfield.Interface()).Kind(), record.Field(j).Type().Name())
 		}
 	}
 
 	return nil
-}
-
-func getTypeArray(arr interface{}) reflect.Type {
-	return reflect.TypeOf(arr).Elem()
 }
 
 // Translating the annotation of a field to field, index/repeat, component
@@ -502,22 +504,27 @@ func readFieldAddressAnnotation(annotation string) (field int, repeat int, compo
 	return field, repeat - 1, component - 1, nil
 }
 
-// input is an unpacked field from an astm-file free of the field delimiter ("|")
-// this function ettracts the field by repeat and component-delimiter
-func extractAstmFieldByRepeatAndComponent(text string, repeat int, component int) (string, error) {
+func getTypeArray(arr interface{}) reflect.Type {
+	return reflect.TypeOf(arr).Elem()
+}
 
-	subfield := strings.Split(text, RepeatDelimiter)
+// this function ettracts the field by repeat and component-delimiter
+func extractFieldByRepeatAndComponent(text string, cutDelimiter, repeatDelimiter string, repeat int, component int) (string, error) {
+
+	//	fmt.Printf("      cut: %s by (%s,%s) at (%d[%d])\n", text, cutDelimiter, repeatDelimiter, repeat, component)
+
+	subfield := strings.Split(text, repeatDelimiter)
 	if repeat >= len(subfield) {
-		return "", errors.New(fmt.Sprintf("Index (%d, %d) out of bounds '%s', delimiter '%s'", repeat, component, text, RepeatDelimiter))
+		return "", fmt.Errorf("index (%d, %d) out of bounds '%s', delimiter '%s'", repeat, component, text, repeatDelimiter)
 	}
 
-	subsubfield := strings.Split(subfield[repeat], ComponentDelimiter)
+	subsubfield := strings.Split(subfield[repeat], cutDelimiter) // TODO:
 	if component > len(subsubfield) || component < 0 {
-		return "", errors.New(fmt.Sprintf("Index (%d, %d) out of bounds '%s' delimiter '%s'", repeat, component, text, ComponentDelimiter))
+		return "", fmt.Errorf("index (%d, %d) out of bounds '%s' delimiter '%s'", repeat, component, text, cutDelimiter)
 	}
 
 	if component >= len(subsubfield) {
-		return "", errors.New(fmt.Sprintf("Index (%d, %d) out of bounds '%s', delimiter '%s'", repeat, component, text, RepeatDelimiter))
+		return "", fmt.Errorf("index (%d, %d) out of bounds '%s', delimiter '%s'", repeat, component, text, repeatDelimiter)
 	}
 
 	return subsubfield[component], nil

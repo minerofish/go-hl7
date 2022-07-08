@@ -5,72 +5,72 @@ import "time"
 // Extended Composite ID With Check Digit
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CX
 type CX struct {
-	Id                                         string `hl7:"0.1"`
-	CheckDigit                                 string `hl7:"0.2"`
-	CodeIdentifyingTheCheckDigitSchemeEmployed HD     `hl7:"0.3"`
-	AssigningAuthority                         string `hl7:"0.4"`
-	AssigningFacility                          HD     `hl7:"0.5"`
+	Id                                         string `hl7:"0"`
+	CheckDigit                                 string `hl7:"1"`
+	CodeIdentifyingTheCheckDigitSchemeEmployed HD     `hl7:"2"`
+	AssigningAuthority                         string `hl7:"3"`
+	AssigningFacility                          HD     `hl7:"4"`
 }
 
 // XPN - Extended Person Name
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/XPN
 type XPN struct {
-	FamilyName          string `hl7:"0.1"`
-	GivenName           string `hl7:"0.2"`
-	MiddleInitialOrName string `hl7:"0.3"`
-	Suffix              string `hl7:"0.4"`
-	Prefix              string `hl7:"0.5"`
-	Degree              string `hl7:"0.6"`
-	NameTypeCode        string `hl7:"0.7"`
-	NameRepresentation  string `hl7:"0.8"`
+	FamilyName          string `hl7:"0"`
+	GivenName           string `hl7:"1"`
+	MiddleInitialOrName string `hl7:"2"`
+	Suffix              string `hl7:"3"`
+	Prefix              string `hl7:"4"`
+	Degree              string `hl7:"5"`
+	NameTypeCode        string `hl7:"6"`
+	NameRepresentation  string `hl7:"7"`
 }
 
 // XAD - Extended Address
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/XAD
 type XAD struct {
-	StreetAddress              string `hl7:"0.1"`
-	OtherDesignation           string `hl7:"0.2"`
-	City                       string `hl7:"0.3"`
-	StateOrProvince            string `hl7:"0.4"`
-	ZipOrPostalCode            string `hl7:"0.5"`
-	Country                    string `hl7:"0.6"`
-	AddressType                string `hl7:"0.7"`
-	OtherGeographicDesignation string `hl7:"0.8"`
-	CountyCode                 string `hl7:"0.9"`
-	CensusTract                string `hl7:"0.10"`
+	StreetAddress              string `hl7:"0"`
+	OtherDesignation           string `hl7:"1"`
+	City                       string `hl7:"2"`
+	StateOrProvince            string `hl7:"3"`
+	ZipOrPostalCode            string `hl7:"4"`
+	Country                    string `hl7:"5"`
+	AddressType                string `hl7:"6"`
+	OtherGeographicDesignation string `hl7:"7"`
+	CountyCode                 string `hl7:"8"`
+	CensusTract                string `hl7:"9"`
 }
 
 // XTN - Extended Telecommunication Number
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/XTN
 type XTN struct {
-	TelephoneNumber                string `hl7:"0.1"`
-	TelecommunicationUseCode       string `hl7:"0.2"`
-	TelecommunicationEquipmentType string `hl7:"0.3"`
-	EmailAddress                   string `hl7:"0.4"`
-	CountryCode                    int    `hl7:"0.5"`
-	AreaCode                       int    `hl7:"0.6"`
-	PhoneNumber                    int    `hl7:"0.7"`
-	Extension                      int    `hl7:"0.8"`
-	AnyText                        string `hl7:"0.9"`
+	TelephoneNumber                string `hl7:"0"`
+	TelecommunicationUseCode       string `hl7:"1"`
+	TelecommunicationEquipmentType string `hl7:"2"`
+	EmailAddress                   string `hl7:"3"`
+	CountryCode                    int    `hl7:"4"`
+	AreaCode                       int    `hl7:"5"`
+	PhoneNumber                    int    `hl7:"6"`
+	Extension                      int    `hl7:"7"`
+	AnyText                        string `hl7:"8"`
 }
 
 // CE - Coded Element
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CE
 type CE struct {
-	Identifier                  string `hl7:"0.1"`
-	Text                        string `hl7:"0.2"`
-	NameOFCodingSystem          string `hl7:"0.3"`
-	AlternateIdentifier         string `hl7:"0.4"`
-	AlternateText               string `hl7:"0.5"`
-	NameOfAlternateCodingSystem string `hl7:"0.6"`
+	Identifier                  string `hl7:"0"`
+	Text                        string `hl7:"1"`
+	NameOFCodingSystem          string `hl7:"2"`
+	AlternateIdentifier         string `hl7:"3"`
+	AlternateText               string `hl7:"4"`
+	NameOfAlternateCodingSystem string `hl7:"5"`
 }
 
 // DLN - Driver's License Number
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/DLN
 type DLN struct {
-	DriverLicenseNumber         string `hl7:"0.1"`
-	IssuingStateProvinceCountry string `hl7:"0.2"`
-	ExpirationDate              string `hl7:"0.3"`
+	DriverLicenseNumber         string `hl7:"0"`
+	IssuingStateProvinceCountry string `hl7:"1"`
+	ExpirationDate              string `hl7:"2"`
 }
 
 // XON - Extended Composite Name And ID For Organizations
@@ -81,141 +81,141 @@ type XON struct {
 // XCN - Extended Composite ID Number And Name
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/XCN
 type XCN struct {
-	ID                                         string `hl7:"0.1"`
-	FamilyName                                 string `hl7:"0.2"`
-	GivenName                                  string `hl7:"0.3"`
-	MiddleInitialOrName                        string `hl7:"0.4"`
-	Suffix                                     string `hl7:"0.5"`
-	Prefix                                     string `hl7:"0.6"`
-	Degree                                     string `hl7:"0.7"`
-	SourceTable                                string `hl7:"0.8"`
-	AssigningAuthority                         HD     `hl7:"0.9"`
-	NameType                                   string `hl7:"0.10"`
-	IdentifierCheckDigit                       string `hl7:"0.11"`
-	CodeIdentifyingTheCheckDigitSchemeEmployed string `hl7:"0.12"`
-	IdentifierTypeCode                         string `hl7:"0.13"`
-	AssigningFacilityID                        HD     `hl7:"0.14"`
+	ID                                         string `hl7:"0"`
+	FamilyName                                 string `hl7:"1"`
+	GivenName                                  string `hl7:"2"`
+	MiddleInitialOrName                        string `hl7:"3"`
+	Suffix                                     string `hl7:"4"`
+	Prefix                                     string `hl7:"5"`
+	Degree                                     string `hl7:"6"`
+	SourceTable                                string `hl7:"7"`
+	AssigningAuthority                         HD     `hl7:"8"`
+	NameType                                   string `hl7:"9"`
+	IdentifierCheckDigit                       string `hl7:"10"`
+	CodeIdentifyingTheCheckDigitSchemeEmployed string `hl7:"11"`
+	IdentifierTypeCode                         string `hl7:"12"`
+	AssigningFacilityID                        HD     `hl7:"13"`
 }
 
 // HD - Hierarchic Designator
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/HD
 type HD struct {
-	NamespaceId     string `hl7:"0.1"`
-	UniversalId     string `hl7:"0.2"`
-	UniversalIdType string `hl7:"0.3"`
+	NamespaceId     string `hl7:"0"`
+	UniversalId     string `hl7:"1"`
+	UniversalIdType string `hl7:"2"`
 }
 
 // CM_AUI - Authorization Information
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_AUI
 type CM_AUI struct {
-	AuthorizationNumber string    `hl7:"0.1"`
-	Date                time.Time `hl7:"0.2,shortdate"`
-	Source              string    `hl7:"0.3"`
+	AuthorizationNumber string    `hl7:"0"`
+	Date                time.Time `hl7:"1,shortdate"`
+	Source              string    `hl7:"2"`
 }
 
 // CM_RMC - Room Coverage
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_RMC
 type CM_RMC struct {
-	RoomType       string  `hl7:"0.1"`
-	AmmountType    string  `hl7:"0.2"`
-	CoverageAmount float32 `hl7:"0.3"`
+	RoomType       string  `hl7:"0"`
+	AmmountType    string  `hl7:"1"`
+	CoverageAmount float32 `hl7:"2"`
 }
 
 // CM_PTA - Policy Type
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_PTA
 type CM_PTA struct {
-	PolicyType  string  `hl7:"0.1"`
-	AmountClass string  `hl7:"0.2"`
-	Amount      float32 `hl7:"0.3"`
+	PolicyType  string  `hl7:"0"`
+	AmountClass string  `hl7:"1"`
+	Amount      float32 `hl7:"2"`
 }
 
 // CM_DDI - Daily Deductible
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_DDI
 type CM_DDI struct {
-	DelayDays    float32 `hl7:"0.1"`
-	Amount       float32 `hl7:"0.2"`
-	NumberOfDays float32 `hl7:"0.3"`
+	DelayDays    float32 `hl7:"0"`
+	Amount       float32 `hl7:"1"`
+	NumberOfDays float32 `hl7:"2"`
 }
 
 // CM_SPS - Specimen Source
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_SPS
 type CM_SPS struct {
-	SpecimenSourceNameOrCode     CE     `hl7:"0.1"`
-	Additives                    string `hl7:"0.2"`
-	Freetext                     string `hl7:"0.3"`
-	BodySite                     CE     `hl7:"0.4"`
-	SiteModifier                 CE     `hl7:"0.5"`
-	CollectionModifierMethodCode CE     `hl7:"0.6"`
+	SpecimenSourceNameOrCode     CE     `hl7:"0"`
+	Additives                    string `hl7:"1"`
+	Freetext                     string `hl7:"2"`
+	BodySite                     CE     `hl7:"3"`
+	SiteModifier                 CE     `hl7:"4"`
+	CollectionModifierMethodCode CE     `hl7:"5"`
 }
 
 // CM_MOC - Charge To Practise
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_MOC
 type CM_MOC struct {
-	DollarAmount MO `hl7:"0.1"`
-	ChargeCode   CE `hl7:"0.2"`
+	DollarAmount MO `hl7:"0"`
+	ChargeCode   CE `hl7:"1"`
 }
 
 // CM_PRL - Parent Result Link
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_PRL
 type CM_PRL struct {
-	ObservationIdentifierOfParentResult CE     `hl7:"0.1"`
-	SubIDOfParentResult                 string `hl7:"0.2"`
-	ObservationResultFromParent         string `hl7:"0.3"`
+	ObservationIdentifierOfParentResult CE     `hl7:"0"`
+	SubIDOfParentResult                 string `hl7:"1"`
+	ObservationResultFromParent         string `hl7:"2"`
 }
 
 // CM_NDL - Observing Practitioner
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_NDL
 type CM_NDL struct {
-	OPName             CN        `hl7:"0.1"`
-	StartDatetime      time.Time `hl7:"0.2"`
-	EndDatetime        time.Time `hl7:"0.3"`
-	PointOfCare        string    `hl7:"0.4"`
-	Room               string    `hl7:"0.5"`
-	Bed                string    `hl7:"0.6"`
-	Facility           HD        `hl7:"0.7"`
-	LocationStatus     string    `hl7:"0.8"`
-	PersonLocationType string    `hl7:"0.9"`
-	Building           string    `hl7:"0.10"`
-	Floor              string    `hl7:"0.11"`
+	OPName             CN        `hl7:"0"`
+	StartDatetime      time.Time `hl7:"1"`
+	EndDatetime        time.Time `hl7:"2"`
+	PointOfCare        string    `hl7:"3"`
+	Room               string    `hl7:"4"`
+	Bed                string    `hl7:"5"`
+	Facility           HD        `hl7:"6"`
+	LocationStatus     string    `hl7:"7"`
+	PersonLocationType string    `hl7:"8"`
+	Building           string    `hl7:"9"`
+	Floor              string    `hl7:"10"`
 }
 
 // MO - Money
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/MO
 type MO struct {
-	Quantity     int    `hl7:"0.1"`
-	Denomination string `hl7:"0.2"`
+	Quantity     int    `hl7:"0"`
+	Denomination string `hl7:"1"`
 }
 
 // CN - Composite ID Number And Name
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CN
 type CN struct {
-	IDNumber            string `hl7:"0.1"`
-	FamilyName          string `hl7:"0.2"`
-	GivenName           string `hl7:"0.3"`
-	MiddleInitialOrName string `hl7:"0.4"`
-	Suffix              string `hl7:"0.5"`
-	Prefix              string `hl7:"0.6"`
-	Degree              string `hl7:"0.7"`
-	SourceTable         string `hl7:"0.8"`
-	AssigningAuthority  string `hl7:"0.9"`
+	IDNumber            string `hl7:"0"`
+	FamilyName          string `hl7:"1"`
+	GivenName           string `hl7:"2"`
+	MiddleInitialOrName string `hl7:"3"`
+	Suffix              string `hl7:"4"`
+	Prefix              string `hl7:"5"`
+	Degree              string `hl7:"6"`
+	SourceTable         string `hl7:"7"`
+	AssigningAuthority  string `hl7:"8"`
 }
 
 // JCC - Job Code Class
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/JCC
 type JCC struct {
-	JobCode  string `hl7:"0.1"`
-	JobClass string `hl7:"0.2"`
+	JobCode  string `hl7:"0"`
+	JobClass string `hl7:"1"`
 }
 
 // HL7 v2.3 - CP - Composite Price
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CP
 type CP struct {
-	Price      float32 `hl7:"0.1"`
-	PriceType  string  `hl7:"0.2"`
-	FromValue  float32 `hl7:"0.3"`
-	ToValue    float32 `hl7:"0.4"`
-	RangeUnits CE      `hl7:"0.5"`
-	RangeType  string  `hl7:"0.6"`
+	Price      float32 `hl7:"0"`
+	PriceType  string  `hl7:"1"`
+	FromValue  float32 `hl7:"2"`
+	ToValue    float32 `hl7:"3"`
+	RangeUnits CE      `hl7:"4"`
+	RangeType  string  `hl7:"5"`
 }
 
 type Sex string
@@ -230,88 +230,88 @@ const (
 // PL - Person Location
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/PL
 type PL struct {
-	PointOfCare        string `hl7:"0.1"`
-	Room               string `hl7:"0.2"`
-	Bed                string `hl7:"0.3"`
-	Facility           HD     `hl7:"0.4"`
-	LocationStatus     string `hl7:"0.5"`
-	PersonLocationType string `hl7:"0.6"`
-	Building           string `hl7:"0.7"`
-	Floor              string `hl7:"0.8"`
-	LocationType       string `hl7:"0.9"`
+	PointOfCare        string `hl7:"0"`
+	Room               string `hl7:"1"`
+	Bed                string `hl7:"2"`
+	Facility           HD     `hl7:"3"`
+	LocationStatus     string `hl7:"4"`
+	PersonLocationType string `hl7:"5"`
+	Building           string `hl7:"6"`
+	Floor              string `hl7:"7"`
+	LocationType       string `hl7:"8"`
 }
 
 // CM_DLD - Discharge Location
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_DLD
 type CM_DLD struct {
-	DischargeLocation string    `hl7:"0.1"`
-	EffectiveDate     time.Time `hl7:"0.2"`
+	DischargeLocation string    `hl7:"0"`
+	EffectiveDate     time.Time `hl7:"1"`
 }
 
 // FC - Financial Class
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/FC
 type FC struct {
-	FinancialClass string    `hl7:"0.1"`
-	EffectiveDate  time.Time `hl7:"0.2"`
+	FinancialClass string    `hl7:"0"`
+	EffectiveDate  time.Time `hl7:"1"`
 }
 
 // CM_EIP - Parent Order
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_EIP
 type CM_EIP struct {
-	ParentsPlacerOrderNumber string `hl7:"0.1"`
-	ParentsFillerOrderNumber string `hl7:"0.2"`
+	ParentsPlacerOrderNumber string `hl7:"0"`
+	ParentsFillerOrderNumber string `hl7:"1"`
 }
 
 // TQ - Timing Quantity
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/TQ
 type TQ struct {
-	Quantity        CQ        `hl7:"0.1"`
-	Interval        RI        `hl7:"0.2"`
-	Duration        string    `hl7:"0.3"`
-	StartDatetime   time.Time `hl7:"0.4"`
-	EndDatetime     time.Time `hl7:"0.5"`
-	Priority        string    `hl7:"0.6"`
-	Condition       string    `hl7:"0.7"`
-	Text            string    `hl7:"0.8"`
-	Conjunction     string    `hl7:"0.9"`
-	OrderSequencing CM_OSD    `hl7:"0.10"`
+	Quantity        CQ        `hl7:"0"`
+	Interval        RI        `hl7:"1"`
+	Duration        string    `hl7:"2"`
+	StartDatetime   time.Time `hl7:"3"`
+	EndDatetime     time.Time `hl7:"4"`
+	Priority        string    `hl7:"5"`
+	Condition       string    `hl7:"6"`
+	Text            string    `hl7:"7"`
+	Conjunction     string    `hl7:"8"`
+	OrderSequencing CM_OSD    `hl7:"9"`
 }
 
 // CQ - Composite Quantity With Units
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CQ
 type CQ struct {
-	Quantity int    `hl7:"0.1"`
-	Units    string `hl7:"0.2"`
+	Quantity int    `hl7:"0"`
+	Units    string `hl7:"1"`
 }
 
 // RI - Repeat Interval
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/RI
 type RI struct {
-	RepeatPattern        string `hl7:"0.1"`
-	ExplicitTimeInterval string `hl7:"0.2"`
+	RepeatPattern        string `hl7:"0"`
+	ExplicitTimeInterval string `hl7:"1"`
 }
 
 // CM_OSD - Order Sequence
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_OSD
 type CM_OSD struct {
-	SequenceResultsFlag               string `hl7:"0.1"`
-	PlacerOrderNumberEntityIdentifier string `hl7:"0.2"`
-	PlacerOrderNumberNamespaceID      string `hl7:"0.3"`
-	FillerOrderNumberEntityIdentifier string `hl7:"0.4"`
-	FillerOrderNumberNamespaceID      string `hl7:"0.5"`
-	SequenceConditionValue            string `hl7:"0.6"`
-	MaximumNumberOfRepeats            int    `hl7:"0.7"`
-	PlacerOrderNumberUniversalID      string `hl7:"0.8"`
-	PlacerOrderNumberUniversalIDType  string `hl7:"0.9"`
-	FillerOrderNumberUniversalID      string `hl7:"0.10"`
-	FillerOrderNumberUniversalIDType  string `hl7:"0.11"`
+	SequenceResultsFlag               string `hl7:"0"`
+	PlacerOrderNumberEntityIdentifier string `hl7:"1"`
+	PlacerOrderNumberNamespaceID      string `hl7:"2"`
+	FillerOrderNumberEntityIdentifier string `hl7:"3"`
+	FillerOrderNumberNamespaceID      string `hl7:"4"`
+	SequenceConditionValue            string `hl7:"5"`
+	MaximumNumberOfRepeats            int    `hl7:"6"`
+	PlacerOrderNumberUniversalID      string `hl7:"7"`
+	PlacerOrderNumberUniversalIDType  string `hl7:"8"`
+	FillerOrderNumberUniversalID      string `hl7:"9"`
+	FillerOrderNumberUniversalIDType  string `hl7:"10"`
 }
 
 // EI - Entity Identifier
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/EI
 type EI struct {
-	EntityIdentifier string `hl7:"0.1"`
-	NamespaceId      string `hl7:"0.2"`
-	UniversalId      string `hl7:"0.3"`
-	UniversalIdType  string `hl7:"0.4"`
+	EntityIdentifier string `hl7:"0"`
+	NamespaceId      string `hl7:"1"`
+	UniversalId      string `hl7:"2"`
+	UniversalIdType  string `hl7:"3"`
 }

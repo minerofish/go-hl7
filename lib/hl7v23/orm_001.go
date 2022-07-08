@@ -9,15 +9,13 @@ import "time"
 // ORM_O01 - Order message
 //https://hl7-definition.caristix.com/v2/HL7v2.3/TriggerEvents/ORM_O01
 type ORM_001 struct {
-	MSH MSH `hl7:"MSH"`
-	/*
-		NotesAndComments NTE `hl7:"NTE,optional"`
-	*/
-	//PatientIdentification PID `hl7:"PID"`
+	MSH              MSH `hl7:"MSH"`
+	NotesAndComments NTE `hl7:"NTE,optional"`
+
 	Patient struct {
-		PatientIdentification PID `hl7:"PID,optional"`
-		//PattientDemographics  PD1   `hl7:"PD1,optional"`
-		//NotesAndComments      []NTE `hl7:"NTE",optional`
+		PatientIdentification PID   `hl7:"PID,optional"`
+		PattientDemographics  PD1   `hl7:"PD1,optional"`
+		NotesAndComments      []NTE `hl7:"NTE",optional`
 	}
 	/*
 		PatientVisit struct {
@@ -67,13 +65,13 @@ type AL1 struct {
 // ORC - Common order segment
 //https://hl7-definition.caristix.com/v2/HL7v2.3/Segments/ORC
 type ORC struct {
-	OrderControl      string `hl7:"1"`
-	PlacerOrderNumber EI     `hl7:"2"`
-	FillerOrderNumber EI     `hl7:"3"`
-	PlacerGroupNumber EI     `hl7:"4"`
-	OrderStatus       string `hl7:"5"`
-	ResponseFlag      string `hl7:"6"`
-	//QuantityTiming         TQ        `hl7:"7"`
+	OrderControl           string    `hl7:"1"`
+	PlacerOrderNumber      EI        `hl7:"2"`
+	FillerOrderNumber      EI        `hl7:"3"`
+	PlacerGroupNumber      EI        `hl7:"4"`
+	OrderStatus            string    `hl7:"5"`
+	ResponseFlag           string    `hl7:"6"`
+	QuantityTiming         TQ        `hl7:"7"`
 	ParentOrder            CM_EIP    `hl7:"8"`
 	DateTimeOfTransaction  time.Time `hl7:"9"`
 	EnteredBy              XCN       `hl7:"10"`
