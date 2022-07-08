@@ -47,8 +47,8 @@ func Test_Parse_MSH_Segment(t *testing.T) {
 }
 
 func Test_Parse_PID_Segment(t *testing.T) {
-	fileData := `MSH|^~\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\r
-PID|1|a^b~^c|00100M56016||Smith^Harry||19500412|M\r`
+	fileData := fmt.Sprintf("MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\u000d")
+	fileData = fileData + fmt.Sprintf("PID|1|a^b~^c|00100M56016||Smith^Harry||19500412|M\u000d")
 
 	var message hl7v23.ORM_001
 	err := hl7.Unmarshal(
@@ -59,9 +59,25 @@ PID|1|a^b~^c|00100M56016||Smith^Harry||19500412|M\r`
 
 	assert.Nil(t, err)
 
-	//assert.NotNil(t, message)
+	assert.NotNil(t, message.Patient)
 	assert.Equal(t, 1, message.Patient.PatientIdentification.ID)
-	// TODO: add other PID asserts here
+	assert.Equal(t, "a", message.Patient.PatientIdentification.ExternalID[0].Id)
+	assert.Equal(t, "b", message.Patient.PatientIdentification.ExternalID[0].CheckDigit)
+	assert.Equal(t, "", message.Patient.PatientIdentification.ExternalID[0].AssigningAuthority)
+	assert.Equal(t, "", message.Patient.PatientIdentification.ExternalID[1].Id)
+	assert.Equal(t, "c", message.Patient.PatientIdentification.ExternalID[1].CheckDigit)
+	assert.Equal(t, "", message.Patient.PatientIdentification.ExternalID[1].AssigningAuthority)
+	assert.Equal(t, "a", message.Patient.PatientIdentification.ExternalID[0].CodeIdentifyingTheCheckDigitSchemeEmployed.NamespaceId)
+	assert.Equal(t, "b", message.Patient.PatientIdentification.ExternalID[0].CodeIdentifyingTheCheckDigitSchemeEmployed.UniversalId)
+	assert.Equal(t, "", message.Patient.PatientIdentification.ExternalID[0].CodeIdentifyingTheCheckDigitSchemeEmployed.UniversalIdType)
+	assert.Equal(t, "00100M56016", message.Patient.PatientIdentification.InternalID[0].Id)
+	assert.Equal(t, "", message.Patient.PatientIdentification.AlternateID[0].Id)
+	assert.Equal(t, "Smith", message.Patient.PatientIdentification.Name.FamilyName)
+	assert.Equal(t, "Harry", message.Patient.PatientIdentification.Name.GivenName)
+	assert.Equal(t, "", message.Patient.PatientIdentification.Name.MiddleInitialOrName)
+	assert.Equal(t, "", message.Patient.PatientIdentification.MothersMaidenName.FamilyName)
+	assert.Equal(t, "1950-04-12 00:00:00 +0100 CET", message.Patient.PatientIdentification.DOB.String())
+	assert.Equal(t, "M", message.Patient.PatientIdentification.Sex)
 }
 
 func Test_Parse_ORC_Segment(t *testing.T) {
