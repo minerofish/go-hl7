@@ -126,6 +126,6 @@ func Test_Parse_OBR_Segment(t *testing.T) {
 		hl7.TimezoneEuropeBerlin)
 
 	assert.Nil(t, err)
-
+	assert.NotNil(t, message.Order.Detail.ObservationRequestSegment)
 	// TODO: add OBR asserts here
 }

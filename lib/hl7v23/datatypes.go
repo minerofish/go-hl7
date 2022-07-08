@@ -81,6 +81,20 @@ type XON struct {
 // XCN - Extended Composite ID Number And Name
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/XCN
 type XCN struct {
+	ID                                         string `hl7:"0.1"`
+	FamilyName                                 string `hl7:"0.2"`
+	GivenName                                  string `hl7:"0.3"`
+	MiddleInitialOrName                        string `hl7:"0.4"`
+	Suffix                                     string `hl7:"0.5"`
+	Prefix                                     string `hl7:"0.6"`
+	Degree                                     string `hl7:"0.7"`
+	SourceTable                                string `hl7:"0.8"`
+	AssigningAuthority                         HD     `hl7:"0.9"`
+	NameType                                   string `hl7:"0.10"`
+	IdentifierCheckDigit                       string `hl7:"0.11"`
+	CodeIdentifyingTheCheckDigitSchemeEmployed string `hl7:"0.12"`
+	IdentifierTypeCode                         string `hl7:"0.13"`
+	AssigningFacilityID                        HD     `hl7:"0.14"`
 }
 
 // HD - Hierarchic Designator
@@ -121,6 +135,63 @@ type CM_DDI struct {
 	DelayDays    float32 `hl7:"0.1"`
 	Amount       float32 `hl7:"0.2"`
 	NumberOfDays float32 `hl7:"0.3"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_SPS
+type CM_SPS struct {
+	SpecimenSourceNameOrCode     CE     `hl7:"0.1"`
+	Additives                    string `hl7:"0.2"`
+	Freetext                     string `hl7:"0.3"`
+	BodySite                     CE     `hl7:"0.4"`
+	SiteModifier                 CE     `hl7:"0.5"`
+	CollectionModifierMethodCode CE     `hl7:"0.6"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_MOC
+type CM_MOC struct {
+	DollarAmount MO `hl7:"0.1"`
+	ChargeCode   CE `hl7:"0.2"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_PRL
+type CM_PRL struct {
+	ObservationIdentifierOfParentResult CE     `hl7:"0.1"`
+	SubIDOfParentResult                 string `hl7:"0.2"`
+	ObservationResultFromParent         string `hl7:"0.3"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_NDL
+type CM_NDL struct {
+	OPName             CN        `hl7:"0.1"`
+	StartDatetime      time.Time `hl7:"0.2"`
+	EndDatetime        time.Time `hl7:"0.3"`
+	PointOfCare        string    `hl7:"0.4"`
+	Room               string    `hl7:"0.5"`
+	Bed                string    `hl7:"0.6"`
+	Facility           HD        `hl7:"0.7"`
+	LocationStatus     string    `hl7:"0.8"`
+	PersonLocationType string    `hl7:"0.9"`
+	Building           string    `hl7:"0.10"`
+	Floor              string    `hl7:"0.11"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/MO
+type MO struct {
+	Quantity     int    `hl7:"0.1"`
+	Denomination string `hl7:"0.2"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CN
+type CN struct {
+	IDNumber            string `hl7:"0.1"`
+	FamilyName          string `hl7:"0.2"`
+	GivenName           string `hl7:"0.3"`
+	MiddleInitialOrName string `hl7:"0.4"`
+	Suffix              string `hl7:"0.5"`
+	Prefix              string `hl7:"0.6"`
+	Degree              string `hl7:"0.7"`
+	SourceTable         string `hl7:"0.8"`
+	AssigningAuthority  string `hl7:"0.9"`
 }
 
 // JCC - Job Code Class
