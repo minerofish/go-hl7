@@ -91,6 +91,25 @@ type HD struct {
 	UniversalIdType string `hl7:"0.3"`
 }
 
+// CM_AUI - Authorization Information
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_AUI
+type CM_AUI struct {
+	AuthorizationNumber string    `hl7:"0.1"`
+	Date                time.Time `hl7:"0.2,shortdate"`
+	Source              string    `hl7:"0.3"`
+}
+
+// HL7 v2.3 - CP - Composite Price
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CP
+type CP struct {
+	Price      float32 `hl7:"0.1"`
+	PriceType  string  `hl7:"0.2"`
+	FromValue  float32 `hl7:"0.3"`
+	ToValue    float32 `hl7:"0.4"`
+	RangeUnits CE      `hl7:"0.5"`
+	RangeType  string  `hl7:"0.6"`
+}
+
 type Sex string
 
 const (

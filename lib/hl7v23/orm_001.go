@@ -47,9 +47,6 @@ type ORM_001 struct {
 	*/
 }
 
-type IN1 struct {
-}
-
 type IN2 struct {
 }
 
