@@ -127,5 +127,16 @@ func Test_Parse_OBR_Segment(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, message.Order.Detail.ObservationRequestSegment)
-	// TODO: add OBR asserts here
+	assert.Equal(t, "1", message.Order.Detail.ObservationRequestSegment.ObservationRequest)
+	assert.Equal(t, "000218T018", message.Order.Detail.ObservationRequestSegment.PlacerOrderNumber.EntityIdentifier)
+	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.PlacerOrderNumber.NamespaceId)
+	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.PlacerOrderNumber.UniversalId)
+	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.PlacerOrderNumber.UniversalIdType)
+	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.FillerOrderNumber.EntityIdentifier)
+	assert.Equal(t, "101", message.Order.Detail.ObservationRequestSegment.UniversalServiceIdentifier.Identifier)
+	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.UniversalServiceIdentifier.Text)
+	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.Priority)
+	assert.Equal(t, "2011-09-26 10:00:00 +0000 UTC", message.Order.Detail.ObservationRequestSegment.RequestedDateTime.String())
+	assert.Equal(t, "0001-01-01 00:00:00 +0000 UTC", message.Order.Detail.ObservationRequestSegment.ObservationDateTime.String())
+	assert.Equal(t, "A", message.Order.Detail.ObservationRequestSegment.SpecimenActionCode)
 }
