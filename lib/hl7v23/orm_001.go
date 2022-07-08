@@ -61,13 +61,13 @@ type AL1 struct {
 }
 
 type ORC struct {
-	OrderControl           string    `hl7:"1"`
-	PlacerOrderNumber      EI        `hl7:"2"`
-	FillerOrderNumber      EI        `hl7:"3"`
-	PlacerGroupNumber      EI        `hl7:"4"`
-	OrderStatus            string    `hl7:"5"`
-	ResponseFlag           string    `hl7:"6"`
-	QuantityTiming         TQ        `hl7:"7"`
+	OrderControl      string `hl7:"1"`
+	PlacerOrderNumber EI     `hl7:"2"`
+	FillerOrderNumber EI     `hl7:"3"`
+	PlacerGroupNumber EI     `hl7:"4"`
+	OrderStatus       string `hl7:"5"`
+	ResponseFlag      string `hl7:"6"`
+	//QuantityTiming         TQ        `hl7:"7"`
 	ParentOrder            CM_EIP    `hl7:"8"`
 	DateTimeOfTransaction  time.Time `hl7:"9"`
 	EnteredBy              XCN       `hl7:"10"`
