@@ -27,24 +27,24 @@ type ORM_001 struct {
 		} `hl7:"optional"`
 		Garantor                  GT1 `hl7:"GT1,optional"`
 		PatientAllergyInformation AL1 `hl7:"AL1,optional"`
-		Order                     struct {
-			CommondOrderSegment ORC `hl7:"ORC"`
-			Detail              struct {
-				ObservationRequestSegment OBR `hl7:"OBR,optional"`
-				RequisitionDetail         RQD `hl7:"RQD,optional"`
-				RequisitionDetail1        RQ1 `hl7:"RQ1,optional"`
-				PharmacyPrescription      RXO `hl7:"RQ1,optional"`
-				DietaryOrders             ODS `hl7:"ODS,optional"`
-				DietTrayInstructions      ODT `hl7:"ODT,optional"`
-			}
-			NotesAndComments            []NTE `hl7:"NTE,optional"`
-			Diagnosis                   DG1   `hl7:"DG1,optional"`
-			Observation                 OBX   `hl7:"OBX,optional"`
-			ObservationNotesAndComments []NTE `hl7:"NTE,optional"`
-			ClinicalTrialIdentification []CTI `hl7:"CTI,optional"`
-			Billing                     BLG   `hl7:"BLG,optional"`
-		}
 	*/
+	Order struct {
+		CommondOrderSegment ORC `hl7:"ORC"`
+		Detail              struct {
+			ObservationRequestSegment OBR `hl7:"OBR,optional"`
+			RequisitionDetail         RQD `hl7:"RQD,optional"`
+			RequisitionDetail1        RQ1 `hl7:"RQ1,optional"`
+			PharmacyPrescription      RXO `hl7:"RQ1,optional"`
+			DietaryOrders             ODS `hl7:"ODS,optional"`
+			DietTrayInstructions      ODT `hl7:"ODT,optional"`
+		}
+		NotesAndComments            []NTE `hl7:"NTE,optional"`
+		Diagnosis                   DG1   `hl7:"DG1,optional"`
+		Observation                 OBX   `hl7:"OBX,optional"`
+		ObservationNotesAndComments []NTE `hl7:"NTE,optional"`
+		ClinicalTrialIdentification []CTI `hl7:"CTI,optional"`
+		Billing                     BLG   `hl7:"BLG,optional"`
+	}
 }
 
 type IN3 struct {

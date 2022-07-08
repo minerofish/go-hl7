@@ -58,8 +58,8 @@ func Test_Parse_PID_Segment(t *testing.T) {
 		hl7.TimezoneEuropeBerlin)
 
 	assert.Nil(t, err)
-
 	assert.NotNil(t, message.Patient)
+	assert.NotNil(t, message.Patient.PatientIdentification)
 	assert.Equal(t, 1, message.Patient.PatientIdentification.ID)
 	assert.Equal(t, "a", message.Patient.PatientIdentification.ExternalID[0].Id)
 	assert.Equal(t, "b", message.Patient.PatientIdentification.ExternalID[0].CheckDigit)
@@ -93,8 +93,8 @@ func Test_Parse_ORC_Segment(t *testing.T) {
 		hl7.TimezoneEuropeBerlin)
 
 	assert.Nil(t, err)
-
-	// TODO: add ORC asserts here
+	assert.NotNil(t, message.Order)
+	assert.NotNil(t, message.Order.Detail)
 }
 
 func Test_Parse_OBR_Segment(t *testing.T) {
