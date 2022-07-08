@@ -4,6 +4,8 @@
 //
 package hl7v23
 
+import "time"
+
 type ORM_001 struct {
 	MSH MSH `hl7:"MSH"`
 	/*
@@ -30,20 +32,22 @@ type ORM_001 struct {
 	*/
 	Order struct {
 		CommondOrderSegment ORC `hl7:"ORC"`
-		Detail              struct {
-			ObservationRequestSegment OBR `hl7:"OBR,optional"`
-			RequisitionDetail         RQD `hl7:"RQD,optional"`
-			RequisitionDetail1        RQ1 `hl7:"RQ1,optional"`
-			PharmacyPrescription      RXO `hl7:"RQ1,optional"`
-			DietaryOrders             ODS `hl7:"ODS,optional"`
-			DietTrayInstructions      ODT `hl7:"ODT,optional"`
-		}
-		NotesAndComments            []NTE `hl7:"NTE,optional"`
-		Diagnosis                   DG1   `hl7:"DG1,optional"`
-		Observation                 OBX   `hl7:"OBX,optional"`
-		ObservationNotesAndComments []NTE `hl7:"NTE,optional"`
-		ClinicalTrialIdentification []CTI `hl7:"CTI,optional"`
-		Billing                     BLG   `hl7:"BLG,optional"`
+		/*
+			Detail              struct {
+				ObservationRequestSegment OBR `hl7:"OBR,optional"`
+				RequisitionDetail         RQD `hl7:"RQD,optional"`
+				RequisitionDetail1        RQ1 `hl7:"RQ1,optional"`
+				PharmacyPrescription      RXO `hl7:"RQ1,optional"`
+				DietaryOrders             ODS `hl7:"ODS,optional"`
+				DietTrayInstructions      ODT `hl7:"ODT,optional"`
+			}
+			NotesAndComments            []NTE `hl7:"NTE,optional"`
+			Diagnosis                   DG1   `hl7:"DG1,optional"`
+			Observation                 OBX   `hl7:"OBX,optional"`
+			ObservationNotesAndComments []NTE `hl7:"NTE,optional"`
+			ClinicalTrialIdentification []CTI `hl7:"CTI,optional"`
+			Billing                     BLG   `hl7:"BLG,optional"`
+		*/
 	}
 }
 
@@ -55,26 +59,56 @@ type GT1 struct {
 
 type AL1 struct {
 }
+
 type ORC struct {
+	OrderControl           string    `hl7:"1"`
+	PlacerOrderNumber      EI        `hl7:"2"`
+	FillerOrderNumber      EI        `hl7:"3"`
+	PlacerGroupNumber      EI        `hl7:"4"`
+	OrderStatus            string    `hl7:"5"`
+	ResponseFlag           string    `hl7:"6"`
+	QuantityTiming         TQ        `hl7:"7"`
+	ParentOrder            CM_EIP    `hl7:"8"`
+	DateTimeOfTransaction  time.Time `hl7:"9"`
+	EnteredBy              XCN       `hl7:"10"`
+	VerifiedBy             XCN       `hl7:"11"`
+	OrderingProvider       XCN       `hl7:"12"`
+	EnterersLocation       PL        `hl7:"13"`
+	CallBackPhoneNumber    XTN       `hl7:"14"`
+	OrderEffectiveDateTime time.Time `hl7:"15"`
+	OrderControlCodeReason CE        `hl7:"16"`
+	EnteringOrganization   CE        `hl7:"17"`
+	EnteringDevice         CE        `hl7:"18"`
+	ActionBy               XCN       `hl7:"19"`
 }
+
 type OBR struct {
 }
+
 type RQD struct {
 }
+
 type RQ1 struct {
 }
+
 type RXO struct {
 }
+
 type ODS struct {
 }
+
 type ODT struct {
 }
+
 type DG1 struct {
 }
+
 type OBX struct {
 }
+
 type CTI struct {
 }
+
 type BLG struct {
 }
 

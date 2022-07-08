@@ -174,3 +174,58 @@ type FC struct {
 	FinancialClass string    `hl7:"0.1"`
 	EffectiveDate  time.Time `hl7:"0.2"`
 }
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_EIP
+type CM_EIP struct {
+	ParentsPlacerOrderNumber string `hl7:"0.1"`
+	ParentsFillerOrderNumber string `hl7:"0.2"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/TQ
+type TQ struct {
+	Quantity        CQ        `hl7:"0.1"`
+	Interval        RI        `hl7:"0.2"`
+	Duration        string    `hl7:"0.3"`
+	StartDatetime   time.Time `hl7:"0.4"`
+	EndDatetime     time.Time `hl7:"0.5"`
+	Priority        string    `hl7:"0.6"`
+	Condition       string    `hl7:"0.7"`
+	Text            string    `hl7:"0.8"`
+	Conjunction     string    `hl7:"0.9"`
+	OrderSequencing CM_OSD    `hl7:"0.10"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CQ
+type CQ struct {
+	Quantity int    `hl7:"0.1"`
+	Units    string `hl7:"0.2"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/RI
+type RI struct {
+	RepeatPattern        string `hl7:"0.1"`
+	ExplicitTimeInterval string `hl7:"0.2"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_OSD
+type CM_OSD struct {
+	SequenceResultsFlag               string `hl7:"0.1"`
+	PlacerOrderNumberEntityIdentifier string `hl7:"0.2"`
+	PlacerOrderNumberNamespaceID      string `hl7:"0.3"`
+	FillerOrderNumberEntityIdentifier string `hl7:"0.4"`
+	FillerOrderNumberNamespaceID      string `hl7:"0.5"`
+	SequenceConditionValue            string `hl7:"0.6"`
+	MaximumNumberOfRepeats            int    `hl7:"0.7"`
+	PlacerOrderNumberUniversalID      string `hl7:"0.8"`
+	PlacerOrderNumberUniversalIDType  string `hl7:"0.9"`
+	FillerOrderNumberUniversalID      string `hl7:"0.10"`
+	FillerOrderNumberUniversalIDType  string `hl7:"0.11"`
+}
+
+//https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/EI
+type EI struct {
+	EntityIdentifier string `hl7:"0.1"`
+	NamespaceId      string `hl7:"0.2"`
+	UniversalId      string `hl7:"0.3"`
+	UniversalIdType  string `hl7:"0.4"`
+}

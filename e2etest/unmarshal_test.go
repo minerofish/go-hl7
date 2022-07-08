@@ -94,7 +94,7 @@ func Test_Parse_ORC_Segment(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, message.Order)
-	assert.NotNil(t, message.Order.Detail)
+	assert.NotNil(t, message.Order.CommondOrderSegment)
 }
 
 func Test_Parse_OBR_Segment(t *testing.T) {
