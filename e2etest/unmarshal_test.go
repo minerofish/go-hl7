@@ -104,9 +104,10 @@ func Test_Parse_ORC_Segment(t *testing.T) {
 	assert.Equal(t, "", message.Order.CommondOrderSegment.PlacerGroupNumber.EntityIdentifier)
 	assert.Equal(t, "", message.Order.CommondOrderSegment.OrderStatus)
 	assert.Equal(t, "Not used", message.Order.CommondOrderSegment.ResponseFlag)
-	// TODO: fix it; there is an err at the parsing of "^^^^^R": Unrecognized time format <^^^^^R>
+	// TODO: implement new & delimiter ... |||Not used|^^a&a^^^R||20110926120055 ...
 	//assert.Equal(t, "", message.Order.CommondOrderSegment.QuantityTiming.Duration)
 	//assert.Equal(t, "R", message.Order.CommondOrderSegment.QuantityTiming.Priority)
+	//assert.Equal(t, "", message.Order.CommondOrderSegment.QuantityTiming.Condition)
 	assert.Equal(t, "", message.Order.CommondOrderSegment.ParentOrder.ParentsPlacerOrderNumber)
 	assert.Equal(t, "", message.Order.CommondOrderSegment.ParentOrder.ParentsFillerOrderNumber)
 	assert.Equal(t, "2011-09-26 10:00:55 +0000 UTC", message.Order.CommondOrderSegment.DateTimeOfTransaction.String())
