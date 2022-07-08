@@ -6,6 +6,8 @@ package hl7v23
 
 import "time"
 
+// ORM_O01 - Order message
+//https://hl7-definition.caristix.com/v2/HL7v2.3/TriggerEvents/ORM_O01
 type ORM_001 struct {
 	MSH MSH `hl7:"MSH"`
 	/*
@@ -62,7 +64,7 @@ type GT1 struct {
 type AL1 struct {
 }
 
-//ORC - Common order segment
+// ORC - Common order segment
 //https://hl7-definition.caristix.com/v2/HL7v2.3/Segments/ORC
 type ORC struct {
 	OrderControl      string `hl7:"1"`
@@ -86,7 +88,7 @@ type ORC struct {
 	ActionBy               XCN       `hl7:"19"`
 }
 
-//OBR - Observation request segment
+// OBR - Observation request segment
 //https://hl7-definition.caristix.com/v2/HL7v2.3/Segments/OBR
 type OBR struct {
 	ObservationRequest                  string    `hl7:"1"`

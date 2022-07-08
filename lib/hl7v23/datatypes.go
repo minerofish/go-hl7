@@ -137,6 +137,7 @@ type CM_DDI struct {
 	NumberOfDays float32 `hl7:"0.3"`
 }
 
+// CM_SPS - Specimen Source
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_SPS
 type CM_SPS struct {
 	SpecimenSourceNameOrCode     CE     `hl7:"0.1"`
@@ -147,12 +148,14 @@ type CM_SPS struct {
 	CollectionModifierMethodCode CE     `hl7:"0.6"`
 }
 
+// CM_MOC - Charge To Practise
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_MOC
 type CM_MOC struct {
 	DollarAmount MO `hl7:"0.1"`
 	ChargeCode   CE `hl7:"0.2"`
 }
 
+// CM_PRL - Parent Result Link
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_PRL
 type CM_PRL struct {
 	ObservationIdentifierOfParentResult CE     `hl7:"0.1"`
@@ -160,6 +163,7 @@ type CM_PRL struct {
 	ObservationResultFromParent         string `hl7:"0.3"`
 }
 
+// CM_NDL - Observing Practitioner
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_NDL
 type CM_NDL struct {
 	OPName             CN        `hl7:"0.1"`
@@ -175,12 +179,14 @@ type CM_NDL struct {
 	Floor              string    `hl7:"0.11"`
 }
 
+// MO - Money
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/MO
 type MO struct {
 	Quantity     int    `hl7:"0.1"`
 	Denomination string `hl7:"0.2"`
 }
 
+// CN - Composite ID Number And Name
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CN
 type CN struct {
 	IDNumber            string `hl7:"0.1"`
@@ -221,6 +227,7 @@ const (
 	Unknown Sex = "U"
 )
 
+// PL - Person Location
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/PL
 type PL struct {
 	PointOfCare        string `hl7:"0.1"`
@@ -234,24 +241,28 @@ type PL struct {
 	LocationType       string `hl7:"0.9"`
 }
 
+// CM_DLD - Discharge Location
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_DLD
 type CM_DLD struct {
 	DischargeLocation string    `hl7:"0.1"`
 	EffectiveDate     time.Time `hl7:"0.2"`
 }
 
+// FC - Financial Class
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/FC
 type FC struct {
 	FinancialClass string    `hl7:"0.1"`
 	EffectiveDate  time.Time `hl7:"0.2"`
 }
 
+// CM_EIP - Parent Order
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_EIP
 type CM_EIP struct {
 	ParentsPlacerOrderNumber string `hl7:"0.1"`
 	ParentsFillerOrderNumber string `hl7:"0.2"`
 }
 
+// TQ - Timing Quantity
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/TQ
 type TQ struct {
 	Quantity        CQ        `hl7:"0.1"`
@@ -266,18 +277,21 @@ type TQ struct {
 	OrderSequencing CM_OSD    `hl7:"0.10"`
 }
 
+// CQ - Composite Quantity With Units
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CQ
 type CQ struct {
 	Quantity int    `hl7:"0.1"`
 	Units    string `hl7:"0.2"`
 }
 
+// RI - Repeat Interval
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/RI
 type RI struct {
 	RepeatPattern        string `hl7:"0.1"`
 	ExplicitTimeInterval string `hl7:"0.2"`
 }
 
+// CM_OSD - Order Sequence
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_OSD
 type CM_OSD struct {
 	SequenceResultsFlag               string `hl7:"0.1"`
@@ -293,6 +307,7 @@ type CM_OSD struct {
 	FillerOrderNumberUniversalIDType  string `hl7:"0.11"`
 }
 
+// EI - Entity Identifier
 //https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/EI
 type EI struct {
 	EntityIdentifier string `hl7:"0.1"`
