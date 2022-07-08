@@ -81,9 +81,9 @@ func Test_Parse_PID_Segment(t *testing.T) {
 }
 
 func Test_Parse_ORC_Segment(t *testing.T) {
-	fileData := `MSH|^~\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\r
-PID|1||00100M56016||Smith^Harry||19500412|M\r
-ORC|NW|000218T018|||||^^^^^R||20110926120055\r`
+	fileData := fmt.Sprintf("MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\u000d")
+	fileData = fileData + fmt.Sprintf("PID|1|a^b~^c|00100M56016||Smith^Harry||19500412|M\u000d")
+	fileData = fileData + fmt.Sprintf("ORC|NW|000218T018|||||^^^^^R||20110926120055\u000d")
 
 	var message hl7v23.ORM_001
 	err := hl7.Unmarshal(
@@ -98,10 +98,10 @@ ORC|NW|000218T018|||||^^^^^R||20110926120055\r`
 }
 
 func Test_Parse_OBR_Segment(t *testing.T) {
-	fileData := `MSH|^~\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\r
-PID|1||00100M56016||Smith^Harry||19500412|M\r
-ORC|NW|000218T018|||||^^^^^R||20110926120055\r
-OBR|1|000218T018||101~102||20110926120000|||||A||||\r`
+	fileData := fmt.Sprintf("MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\u000d")
+	fileData = fileData + fmt.Sprintf("PID|1|a^b~^c|00100M56016||Smith^Harry||19500412|M\u000d")
+	fileData = fileData + fmt.Sprintf("ORC|NW|000218T018|||||^^^^^R||20110926120055\u000d")
+	fileData = fileData + fmt.Sprintf("OBR|1|000218T018||101~102||20110926120000|||||A||||\u000d")
 
 	var message hl7v23.ORM_001
 	err := hl7.Unmarshal(
