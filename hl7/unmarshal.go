@@ -421,7 +421,7 @@ func reflectAnnotatedFields(inputStr string, record reflect.Value, timezone *tim
 			default:
 				inputFieldValue := inputFields[currentInputFieldNo]
 				if err = reflectAnnotatedFields(inputFieldValue, recordfield, timezone, isHeader); err != nil {
-					return errors.New(fmt.Sprintf("Unrecognized format <%s>", inputFieldValue))
+					return err
 				}
 				break
 			}
