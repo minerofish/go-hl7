@@ -22,6 +22,10 @@ type Delimiters struct {
 	Escape    string
 }
 
+type Error string
+
+var EOF = fmt.Errorf("EOF")
+
 func Unmarshal(messageData []byte, targetStruct interface{}, enc Encoding, tz Timezone) error {
 	var (
 		messageBytes []byte
@@ -66,9 +70,16 @@ func Unmarshal(messageData []byte, targetStruct interface{}, enc Encoding, tz Ti
 	}
 
 	// first try to break by 0x0a (non-standard, but used sometimes)
-	bufferedInputLines := strings.Split(string(messageBytes), string([]byte{0x0A})) // copy
-	if len(bufferedInputLines) <= 1 {                                               // if it was not possible to break with non-standard 0x0a line-break try 0d (standard)
-		bufferedInputLines = strings.Split(string(messageBytes), string([]byte{0x0D}))
+	bufferedInputLinesWithBlanks := strings.Split(string(messageBytes), string([]byte{0x0A}))
+	if len(bufferedInputLinesWithBlanks) <= 1 { // if it was not possible to break with non-standard 0x0a line-break try 0d (standard)
+		bufferedInputLinesWithBlanks = strings.Split(string(messageBytes), string([]byte{0x0D}))
+	}
+	bufferedInputLines := make([]string, 0)
+	for _, x := range bufferedInputLinesWithBlanks {
+		trimmed := strings.Trim(x, " ")
+		if trimmed != "" {
+			bufferedInputLines = append(bufferedInputLines, trimmed)
+		}
 	}
 
 	// strip the remaining 0A and 0D Linefeed at the end
@@ -97,8 +108,14 @@ func Unmarshal(messageData []byte, targetStruct interface{}, enc Encoding, tz Ti
 		delimiters.SubSub = bufferedInputLines[0][7:8]    // Default &
 	}
 
-	if _, _, err = ParseStruct(bufferedInputLines, 1 /*recursion*/, 0 /*line*/, targetStruct, enc, tz, delimiters); err != nil {
-		return err
+	var lastProcessedLine int
+	if lastProcessedLine, _, err = ParseStruct(bufferedInputLines, 0 /*recursion*/, 0 /*line*/, targetStruct, enc, tz, delimiters); err != nil {
+		if err != EOF {
+			return err
+		}
+	}
+	if lastProcessedLine != len(bufferedInputLines) {
+		return fmt.Errorf("unable to process record %s", bufferedInputLines[lastProcessedLine])
 	}
 
 	return nil
@@ -128,6 +145,8 @@ const (
 // This function takes a string and a struct and matches the annotated fields to the string-input
 func ParseStruct(bufferedInputLines []string, depth int, currentInputLine int, targetStruct interface{}, enc Encoding, tz Timezone, delimiters Delimiters) (int, RETV, error) {
 
+	hasMatchedAtLeastOneRecord := false
+
 	timeLocation, err := time.LoadLocation(string(tz))
 	if err != nil {
 		return currentInputLine, ERROR, err
@@ -138,6 +157,10 @@ func ParseStruct(bufferedInputLines []string, depth int, currentInputLine int, t
 
 	for i := 0; i < targetStructType.NumField(); i++ {
 
+		if currentInputLine >= len(bufferedInputLines) {
+			break
+		}
+
 		currentRecord := targetStructValue.Field(i)
 		ftype := targetStructType.Field(i)
 		hl7 := ftype.Tag.Get("hl7")
@@ -147,9 +170,16 @@ func ParseStruct(bufferedInputLines []string, depth int, currentInputLine int, t
 
 			switch currentRecord.Kind() {
 			case reflect.Struct:
+
 				var err error
 				var retv RETV
+
+				lineBefore := currentInputLine
 				currentInputLine, retv, err = ParseStruct(bufferedInputLines, depth+1, currentInputLine, currentRecord.Addr().Interface(), enc, tz, delimiters)
+				if currentInputLine != lineBefore {
+					hasMatchedAtLeastOneRecord = true
+				}
+
 				if err != nil {
 					if retv == UNEXPECTED {
 						if depth > 0 {
@@ -178,8 +208,12 @@ func ParseStruct(bufferedInputLines []string, depth int, currentInputLine int, t
 							allocatedElement := reflect.New(innerStructureType)
 							var err error
 							var retv RETV
+							lineBefore := currentInputLine
 							currentInputLine, retv, err = ParseStruct(bufferedInputLines, depth+1,
 								currentInputLine, allocatedElement.Interface(), enc, tz, delimiters)
+							if lineBefore != currentInputLine {
+								hasMatchedAtLeastOneRecord = true
+							}
 							if err != nil {
 								if retv == UNEXPECTED {
 									if depth > 0 {
@@ -211,11 +245,17 @@ func ParseStruct(bufferedInputLines []string, depth int, currentInputLine int, t
 			expectedInputRecordTypeOptional = true
 		}
 
+		if currentInputLine >= len(bufferedInputLines) {
+			break
+		}
+
 		if len(bufferedInputLines[currentInputLine]) == 0 {
 			continue // skip empty line
 		}
 
 		if expectInputRecordType == bufferedInputLines[currentInputLine][0:3] {
+
+			hasMatchedAtLeastOneRecord = true
 
 			// Array of Segments
 			if currentRecord.Kind() == reflect.Slice {
@@ -226,7 +266,7 @@ func ParseStruct(bufferedInputLines []string, depth int, currentInputLine int, t
 
 					allocatedElement := reflect.New(innerStructureType)
 
-					if err = parseStruct(bufferedInputLines[currentInputLine], 0 /*subdepth=0*/, allocatedElement.Elem(), timeLocation, delimiters); err != nil {
+					if err = parseStructA(bufferedInputLines[currentInputLine], 0 /*subdepth=0*/, allocatedElement.Elem(), timeLocation, delimiters); err != nil {
 						return currentInputLine, ERROR, fmt.Errorf("failed to process input line '%s' err:%w", bufferedInputLines[currentInputLine], err)
 					}
 
@@ -235,7 +275,7 @@ func ParseStruct(bufferedInputLines []string, depth int, currentInputLine int, t
 
 					// keep reading while same elements are up
 					currentInputLine = currentInputLine + 1
-					if expectInputRecordType != bufferedInputLines[currentInputLine][0:3] {
+					if currentInputLine < len(bufferedInputLines) && expectInputRecordType != bufferedInputLines[currentInputLine][0:3] {
 						break
 					}
 
@@ -247,7 +287,7 @@ func ParseStruct(bufferedInputLines []string, depth int, currentInputLine int, t
 
 			} else {
 
-				if err = parseStruct(bufferedInputLines[currentInputLine], 0 /*subdepth=0*/, currentRecord, timeLocation, delimiters); err != nil {
+				if err = parseStructA(bufferedInputLines[currentInputLine], 0 /*subdepth=0*/, currentRecord, timeLocation, delimiters); err != nil {
 					return currentInputLine, ERROR, fmt.Errorf("failed to process input line '%s' err:%w", bufferedInputLines[currentInputLine], err)
 				}
 
@@ -270,10 +310,17 @@ func ParseStruct(bufferedInputLines []string, depth int, currentInputLine int, t
 		}
 	}
 
+	if !hasMatchedAtLeastOneRecord {
+		if currentInputLine < len(bufferedInputLines) {
+			return currentInputLine, UNEXPECTED, fmt.Errorf("unable to process line '%s'", bufferedInputLines[currentInputLine])
+		} else {
+			return currentInputLine, UNEXPECTED, EOF
+		}
+	}
 	return currentInputLine, OK, nil
 }
 
-func parseStruct(inputStr string, subdepth int, record reflect.Value, timezone *time.Location, delimiters Delimiters) error {
+func parseStructA(inputStr string, subdepth int, record reflect.Value, timezone *time.Location, delimiters Delimiters) error {
 
 	delimiterBySubDepth := ""
 	nextDelimiterBySubDepth := ""
@@ -340,6 +387,8 @@ func parseStruct(inputStr string, subdepth int, record reflect.Value, timezone *
 			if sliceContainsString(hl7TagsList, ANNOTATION_DELIMITER) {
 				// The delimiter Field itself would be pointless to cut with delimiters :)
 				reflect.ValueOf(recordFieldInterface).Elem().SetString(inputFields[addr_component])
+			} else if sliceContainsString(hl7TagsList, ANNOTATION_FIELDSEPARATOR) {
+				reflect.ValueOf(recordFieldInterface).Elem().SetString(delimiters.Composite)
 			} else if value, err := extractFieldByRepeatAndComponent(inputFields[addr_component], nextDelimiterBySubDepth, delimiters.Repeat, addr_repeat, addr_subcomponent); err == nil {
 
 				fmt.Printf("    %s = '%s'\n", recordfield.Type().Name(), value)
@@ -433,7 +482,7 @@ func parseStruct(inputStr string, subdepth int, record reflect.Value, timezone *
 			default:
 
 				inputFieldValue := inputFields[addr_component]
-				if err = parseStruct(inputFieldValue, subdepth+1, recordfield, timezone, delimiters); err != nil {
+				if err = parseStructA(inputFieldValue, subdepth+1, recordfield, timezone, delimiters); err != nil {
 					return err
 				}
 
@@ -452,7 +501,7 @@ func parseStruct(inputStr string, subdepth int, record reflect.Value, timezone *
 			if elemType.Kind() == reflect.Struct {
 				// if it is an object of the array
 				for i, fieldPart := range fieldParts {
-					if err = parseStruct(fieldPart, subdepth+1, recordfield.Index(i), timezone, delimiters); err != nil {
+					if err = parseStructA(fieldPart, subdepth+1, recordfield.Index(i), timezone, delimiters); err != nil {
 						return fmt.Errorf("unrecognized time format <%s>", fieldPart)
 					}
 				}

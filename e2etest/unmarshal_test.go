@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Test_Parse_MSH_Segment, this test has only one line
 func Test_Parse_MSH_Segment(t *testing.T) {
 	fileData := fmt.Sprintf("MSH|^~\\&|HL7_Host^b^c|HL7_Office^^Xyz|CIT^^|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1~second_element|<\u000d")
 
@@ -21,7 +22,7 @@ func Test_Parse_MSH_Segment(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, message.MSH)
-	//assert.Equal(t, "|", message.MSH.FieldSeparator)
+	assert.Equal(t, "|", message.MSH.FieldSeparator)
 	assert.Equal(t, "^~\\&", message.MSH.EncodingCharacters)
 	assert.Equal(t, "HL7_Host", message.MSH.SendingApplication.NamespaceId)
 	assert.Equal(t, "b", message.MSH.SendingApplication.UniversalId)
@@ -46,18 +47,23 @@ func Test_Parse_MSH_Segment(t *testing.T) {
 	assert.Equal(t, "<", message.MSH.PrincipalLanguageOfMessage.Identifier)
 }
 
-func Test_Parse_PID_Segment(t *testing.T) {
-	fileData := fmt.Sprintf("MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\u000d")
-	fileData = fileData + fmt.Sprintf("PID|1|a^b~^c|00100M56016||Smith^Harry||19500412|M\u000d")
+// Run a Testorder provided by Roche cITM but its some standard with each record once
+func Test_Order_ORM_generic1(t *testing.T) {
+	var filedata string
+	filedata = filedata + "MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|\u000d"
+	filedata = filedata + "PID|1|a^b~^c|00100M56016||Smith^Harry||19500412|M\u000d"
+	filedata = filedata + "ORC|NW|000218T018||||Not used|^^^^^R||20110926120055\u000d"
+	filedata = filedata + "OBR|1|000218T018||101~102||20110926120000|||||A||||\u000d"
 
 	var message hl7v23.ORM_001
 	err := hl7.Unmarshal(
-		[]byte(fileData),
+		[]byte(filedata),
 		&message,
 		hl7.EncodingUTF8,
 		hl7.TimezoneEuropeBerlin)
 
 	assert.Nil(t, err)
+
 	assert.NotNil(t, message.Patient)
 	assert.NotNil(t, message.Patient.PatientIdentification)
 	assert.Equal(t, 1, message.Patient.PatientIdentification.ID)
@@ -79,70 +85,39 @@ func Test_Parse_PID_Segment(t *testing.T) {
 	assert.Equal(t, "", message.Patient.PatientIdentification.MothersMaidenName.FamilyName)
 	assert.Equal(t, "1950-04-12 00:00:00 +0100 CET", message.Patient.PatientIdentification.DOB.String())
 	assert.Equal(t, "M", message.Patient.PatientIdentification.Sex)
-}
 
-func Test_Parse_ORC_Segment(t *testing.T) {
-	fileData := fmt.Sprintf("MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\u000d")
-	fileData = fileData + fmt.Sprintf("PID|1|a^b~^c|00100M56016||Smith^Harry||19500412|M\u000d")
-	fileData = fileData + fmt.Sprintf("ORC|NW|000218T018||||Not used|5&b^3&d^^^^R||20110926120055\u000d")
+	assert.Equal(t, 1, len(message.Order))
 
-	var message hl7v23.ORM_001
-	err := hl7.Unmarshal(
-		[]byte(fileData),
-		&message,
-		hl7.EncodingUTF8,
-		hl7.TimezoneEuropeBerlin)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, message.Order)
-	assert.NotNil(t, message.Order.CommondOrderSegment)
-
-	assert.Equal(t, "Smith", message.Patient.PatientIdentification.Name.FamilyName)
-	assert.Equal(t, "Harry", message.Patient.PatientIdentification.Name.GivenName)
-
-	assert.Equal(t, "NW", message.Order.CommondOrderSegment.OrderControl)
-	assert.Equal(t, "000218T018", message.Order.CommondOrderSegment.PlacerOrderNumber.EntityIdentifier)
-	assert.Equal(t, "", message.Order.CommondOrderSegment.PlacerOrderNumber.NamespaceId)
-	assert.Equal(t, "", message.Order.CommondOrderSegment.PlacerOrderNumber.UniversalId)
-	assert.Equal(t, "", message.Order.CommondOrderSegment.PlacerOrderNumber.UniversalIdType)
-	assert.Equal(t, "", message.Order.CommondOrderSegment.FillerOrderNumber.EntityIdentifier)
-	assert.Equal(t, "", message.Order.CommondOrderSegment.PlacerGroupNumber.EntityIdentifier)
-	assert.Equal(t, "", message.Order.CommondOrderSegment.OrderStatus)
-	assert.Equal(t, "Not used", message.Order.CommondOrderSegment.ResponseFlag)
-	assert.Equal(t, "R", message.Order.CommondOrderSegment.QuantityTiming.Priority)
-	//assert.Equal(t, "", message.Order.CommondOrderSegment.QuantityTiming.Duration)
-	//assert.Equal(t, "R", message.Order.CommondOrderSegment.QuantityTiming.Priority)
-	//assert.Equal(t, "", message.Order.CommondOrderSegment.QuantityTiming.Condition)
-	//assert.Equal(t, "", message.Order.CommondOrderSegment.ParentOrder.ParentsPlacerOrderNumber)
-	//assert.Equal(t, "", message.Order.CommondOrderSegment.ParentOrder.ParentsFillerOrderNumber)
-	//assert.Equal(t, "2011-09-26 10:00:55 +0000 UTC", message.Order.CommondOrderSegment.DateTimeOfTransaction.String())
-}
-
-func Test_Parse_OBR_Segment(t *testing.T) {
-	fileData := fmt.Sprintf("MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1|<\u000d")
-	fileData = fileData + fmt.Sprintf("PID|1|a^b~^c|00100M56016||Smith^Harry||19500412|M\u000d")
-	fileData = fileData + fmt.Sprintf("ORC|NW|000218T018|||||^^^^^R||20110926120055\u000d")
-	fileData = fileData + fmt.Sprintf("OBR|1|000218T018||101~102||20110926120000|||||A||||\u000d")
-
-	var message hl7v23.ORM_001
-	err := hl7.Unmarshal(
-		[]byte(fileData),
-		&message,
-		hl7.EncodingUTF8,
-		hl7.TimezoneEuropeBerlin)
+	assert.Equal(t, "NW", message.Order[0].CommondOrderSegment.OrderControl)
+	assert.Equal(t, "000218T018", message.Order[0].CommondOrderSegment.PlacerOrderNumber.EntityIdentifier)
+	assert.Equal(t, "", message.Order[0].CommondOrderSegment.PlacerOrderNumber.NamespaceId)
+	assert.Equal(t, "", message.Order[0].CommondOrderSegment.PlacerOrderNumber.UniversalId)
+	assert.Equal(t, "", message.Order[0].CommondOrderSegment.PlacerOrderNumber.UniversalIdType)
+	assert.Equal(t, "", message.Order[0].CommondOrderSegment.FillerOrderNumber.EntityIdentifier)
+	assert.Equal(t, "", message.Order[0].CommondOrderSegment.PlacerGroupNumber.EntityIdentifier)
+	assert.Equal(t, "", message.Order[0].CommondOrderSegment.OrderStatus)
+	assert.Equal(t, "Not used", message.Order[0].CommondOrderSegment.ResponseFlag)
+	assert.Equal(t, "R", message.Order[0].CommondOrderSegment.QuantityTiming.Priority)
+	assert.Equal(t, "", message.Order[0].CommondOrderSegment.QuantityTiming.Duration)
+	assert.Equal(t, "R", message.Order[0].CommondOrderSegment.QuantityTiming.Priority)
+	assert.Equal(t, "", message.Order[0].CommondOrderSegment.QuantityTiming.Condition)
+	assert.Equal(t, "", message.Order[0].CommondOrderSegment.ParentOrder.ParentsPlacerOrderNumber)
+	assert.Equal(t, "", message.Order[0].CommondOrderSegment.ParentOrder.ParentsFillerOrderNumber)
+	assert.Equal(t, "2011-09-26 10:00:55 +0000 UTC", message.Order[0].CommondOrderSegment.DateTimeOfTransaction.String())
 
 	assert.Nil(t, err)
-	assert.NotNil(t, message.Order.Detail.ObservationRequestSegment)
-	assert.Equal(t, "1", message.Order.Detail.ObservationRequestSegment.ObservationRequest)
-	assert.Equal(t, "000218T018", message.Order.Detail.ObservationRequestSegment.PlacerOrderNumber.EntityIdentifier)
-	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.PlacerOrderNumber.NamespaceId)
-	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.PlacerOrderNumber.UniversalId)
-	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.PlacerOrderNumber.UniversalIdType)
-	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.FillerOrderNumber.EntityIdentifier)
-	assert.Equal(t, "101", message.Order.Detail.ObservationRequestSegment.UniversalServiceIdentifier.Identifier)
-	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.UniversalServiceIdentifier.Text)
-	assert.Equal(t, "", message.Order.Detail.ObservationRequestSegment.Priority)
-	assert.Equal(t, "2011-09-26 10:00:00 +0000 UTC", message.Order.Detail.ObservationRequestSegment.RequestedDateTime.String())
-	assert.Equal(t, "0001-01-01 00:00:00 +0000 UTC", message.Order.Detail.ObservationRequestSegment.ObservationDateTime.String())
-	assert.Equal(t, "A", message.Order.Detail.ObservationRequestSegment.SpecimenActionCode)
+	assert.NotNil(t, message.Order[0].Detail.ObservationRequestSegment)
+	assert.Equal(t, "1", message.Order[0].Detail.ObservationRequestSegment.ObservationRequest)
+	assert.Equal(t, "000218T018", message.Order[0].Detail.ObservationRequestSegment.PlacerOrderNumber.EntityIdentifier)
+	assert.Equal(t, "", message.Order[0].Detail.ObservationRequestSegment.PlacerOrderNumber.NamespaceId)
+	assert.Equal(t, "", message.Order[0].Detail.ObservationRequestSegment.PlacerOrderNumber.UniversalId)
+	assert.Equal(t, "", message.Order[0].Detail.ObservationRequestSegment.PlacerOrderNumber.UniversalIdType)
+	assert.Equal(t, "", message.Order[0].Detail.ObservationRequestSegment.FillerOrderNumber.EntityIdentifier)
+	assert.Equal(t, "101", message.Order[0].Detail.ObservationRequestSegment.UniversalServiceIdentifier.Identifier)
+	assert.Equal(t, "", message.Order[0].Detail.ObservationRequestSegment.UniversalServiceIdentifier.Text)
+	assert.Equal(t, "", message.Order[0].Detail.ObservationRequestSegment.Priority)
+	assert.Equal(t, "2011-09-26 10:00:00 +0000 UTC", message.Order[0].Detail.ObservationRequestSegment.RequestedDateTime.String())
+	assert.Equal(t, "0001-01-01 00:00:00 +0000 UTC", message.Order[0].Detail.ObservationRequestSegment.ObservationDateTime.String())
+	assert.Equal(t, "A", message.Order[0].Detail.ObservationRequestSegment.SpecimenActionCode)
+
 }

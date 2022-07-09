@@ -337,3 +337,46 @@ type CM_PCF struct {
 	PreCertificationRequired string `hl7:"1"`
 	PreCertificationWindow   string `hl7:"2"`
 }
+
+// LA1 - Location With Address Information
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/LA1
+type LA1 struct {
+	PointOfCare        string `hl7:"0"`
+	Room               string `hl7:"1"`
+	Bed                string `hl7:"2"`
+	Facility           HD     `hl7:"3"`
+	LocationStatus     string `hl7:"4"`
+	PersonLocationType string `hl7:"5"`
+	Building           string `hl7:"6"`
+	Floor              string `hl7:"7"`
+	Address            AD     `hl7:"8"`
+}
+
+// HL7 v2.3 - AD - Address
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/AD
+type AD struct {
+	StreetAddress              string `hl7:"0"`
+	OtherDesignation           string `hl7:"1"`
+	City                       string `hl7:"2"`
+	StateOrProvince            string `hl7:"3"`
+	PostalCode                 string `hl7:"4"`
+	Country                    string `hl7:"5"`
+	AddressType                string `hl7:"6"`
+	OtherGeographicDesignation string `hl7:"7"`
+}
+
+// CM_CCD - Charge Time
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_CCD
+type CM_CCD struct {
+	WhenToChargeCode string    `hl7:"0"`
+	DateTime         time.Time `hl7:"1,longdate"`
+}
+
+// CK - Composite ID With Check Digit
+// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CK
+type CK struct {
+	IDNumber           int    `hl7:"0"`
+	CheckDigit         string `hl7:"1"`
+	CodeIdentifyingCC  string `hl7:"2"`
+	AssigningAuthority HD     `hl7:"3"`
+}
