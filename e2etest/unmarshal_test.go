@@ -1,14 +1,6 @@
 package e2e
 
-import (
-	"fmt"
-	"testing"
-
-	"github.com/DRK-Blutspende-BaWueHe/go-hl7"
-	"github.com/DRK-Blutspende-BaWueHe/go-hl7/lib/hl7v23"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 // Test_Parse_MSH_Segment, this test has only one line
 func Test_Parse_MSH_Segment(t *testing.T) {
 	fileData := fmt.Sprintf("MSH|^~\\&|HL7_Host^b^c|HL7_Office^^Xyz|CIT^^|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|||ER|ER||8859/1~second_element|<\u000d")
@@ -121,3 +113,4 @@ func Test_Order_ORM_generic1(t *testing.T) {
 	assert.Equal(t, "A", message.Order[0].Detail.ObservationRequestSegment.SpecimenActionCode)
 
 }
+*/

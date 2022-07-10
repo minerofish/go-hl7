@@ -11,7 +11,7 @@ type MSH struct {
 	SendingFacility                HD        `hl7:"3"`
 	ReceivingApplication           HD        `hl7:"4"`
 	ReceivingFacility              HD        `hl7:"5"`
-	DateTimeOfMessage              time.Time `hl7:"6"`
+	DateTimeOfMessage              time.Time `hl7:"6,longdate"`
 	Security                       string    `hl7:"7"`
 	MessageType                    string    `hl7:"8.1"`
 	MessageTriggerEvent            string    `hl7:"8.2"`

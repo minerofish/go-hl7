@@ -7,7 +7,8 @@ package hl7v23
 // ORM_O01 - Order message
 //https://hl7-definition.caristix.com/v2/HL7v2.3/TriggerEvents/ORM_O01
 type ORM_001 struct {
-	MSH              MSH `hl7:"MSH"`
+	MSH MSH `hl7:"MSH"`
+
 	NotesAndComments NTE `hl7:"NTE,optional"`
 
 	Patient struct {

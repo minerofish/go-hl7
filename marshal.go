@@ -1,7 +1,6 @@
 package hl7
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"sort"
@@ -9,8 +8,7 @@ import (
 	"time"
 )
 
-/** Marshal - wrap datastructure to code
-**/
+// Marshal - wrap datastructure to code
 func Marshal(message interface{}, enc Encoding, tz Timezone, notation Notation) ([][]byte, error) {
 
 	location, err := time.LoadLocation(string(tz))
@@ -18,12 +16,26 @@ func Marshal(message interface{}, enc Encoding, tz Timezone, notation Notation) 
 		return [][]byte{}, err
 	}
 
-	// default delmiters. These will be overwritten by the first occurence of "delimter"-annotation
-	repeatDelimiter := "\\"
-	componentDelimiter := "^"
-	escapeDelimiter := "&"
+	var delimiters Delimiters
 
-	buffer, err := iterateStructFieldsAndBuildOutput(message, 1, enc, location, notation, &repeatDelimiter, &componentDelimiter, &escapeDelimiter)
+	delimiters.Composite = "|"
+	delimiters.Sub = "^"
+	delimiters.Repeat = "~"
+	delimiters.Escape = "\\"
+	delimiters.SubSub = "&"
+
+	buffer, err := processStruct(message, 1, enc, location, notation, delimiters)
+
+	// the algorithm generates the pattern <field>+"|", which causes the record to always! have one delimiter too much at the end
+	/*for idx, x := range buffer {
+		str := string(x)
+		if len(str) > 2 {
+			if str[len(str)-1:] == delimiters.Composite {
+				str = str[:len(str)-1] // obsolete the very last "|"
+			}
+		}
+		buffer[idx] = []byte(str)
+	}*/
 
 	return buffer, err
 }
@@ -35,8 +47,8 @@ type OutputRecord struct {
 
 type OutputRecords []OutputRecord
 
-func iterateStructFieldsAndBuildOutput(message interface{}, depth int, enc Encoding, location *time.Location, notation Notation,
-	repeatDelimiter, componentDelimiter, escapeDelimiter *string) ([][]byte, error) {
+func processStruct(message interface{}, depth int, enc Encoding, location *time.Location, notation Notation,
+	delimiters Delimiters) ([][]byte, error) {
 
 	buffer := make([][]byte, 0)
 
@@ -46,16 +58,18 @@ func iterateStructFieldsAndBuildOutput(message interface{}, depth int, enc Encod
 	for i := 0; i < messageValue.NumField(); i++ {
 
 		currentRecord := messageValue.Field(i)
-		recordAstmTag := messageType.Field(i).Tag.Get("hl7")
-		recordAstmTagsList := strings.Split(recordAstmTag, ",")
+		currentRecordTag := messageType.Field(i).Tag.Get("hl7")
+		currentRecordTagsList := strings.Split(currentRecordTag, ",")
 
-		if len(recordAstmTag) == 0 { // no annotation = Descend if its an array or a struct of such
+		if len(currentRecordTag) == 0 { // no annotation = Descend if its an array or a struct of such
 
 			if currentRecord.Kind() == reflect.Slice { // array of something = iterate and recurse
+
 				for x := 0; x < currentRecord.Len(); x++ {
+
 					dood := currentRecord.Index(x).Interface()
 
-					if bytes, err := iterateStructFieldsAndBuildOutput(dood, depth+1, enc, location, notation, repeatDelimiter, componentDelimiter, escapeDelimiter); err != nil {
+					if bytes, err := processStruct(dood, depth+1, enc, location, notation, delimiters); err != nil {
 						return nil, err
 					} else {
 						for line := 0; line < len(bytes); line++ {
@@ -63,9 +77,10 @@ func iterateStructFieldsAndBuildOutput(message interface{}, depth int, enc Encod
 						}
 					}
 				}
+
 			} else if currentRecord.Kind() == reflect.Struct { // got the struct straignt = recurse directly
 
-				if bytes, err := iterateStructFieldsAndBuildOutput(currentRecord.Interface(), depth+1, enc, location, notation, repeatDelimiter, componentDelimiter, escapeDelimiter); err != nil {
+				if bytes, err := processStruct(currentRecord.Interface(), depth+1, enc, location, notation, delimiters); err != nil {
 					return nil, err
 				} else {
 					for line := 0; line < len(bytes); line++ {
@@ -74,29 +89,37 @@ func iterateStructFieldsAndBuildOutput(message interface{}, depth int, enc Encod
 				}
 
 			} else {
-				return nil, errors.New(fmt.Sprintf("Invalid Datatype without any annotation '%s'. You can use struct or slices of structs.", currentRecord.Kind()))
+
+				return nil, fmt.Errorf("invalid Datatype without any annotation '%s'. You can use struct or slices of structs", currentRecord.Kind())
+
 			}
 
-		} else {
+		} else { // an annotated Record
 
-			recordType := recordAstmTagsList[0]
+			recordType := currentRecordTagsList[0]
 
-			if currentRecord.Kind() == reflect.Slice { // it is an annotated slice
+			switch currentRecord.Kind() {
+			case reflect.Slice: // it is an annotated slice
 				if !currentRecord.IsNil() {
 					for x := 0; x < currentRecord.Len(); x++ {
-						outs, err := processOneRecord(recordType, currentRecord.Index(x), x+1, location, repeatDelimiter, componentDelimiter, escapeDelimiter) // fmt.Println(outp)
+						outs, err := processSegment(recordType, 0, currentRecord.Index(x), x+1, location, delimiters) // fmt.Println(outp)
 						if err != nil {
 							return nil, err
 						}
 						buffer = append(buffer, []byte(outs))
 					}
 				}
-			} else {
-				outs, err := processOneRecord(recordType, currentRecord, 1, location, repeatDelimiter, componentDelimiter, escapeDelimiter) // fmt.Println(outp)
+			case reflect.Struct:
+				outs, err := processSegment(recordType, 0, currentRecord, 1, location, delimiters) // fmt.Println(outp)
 				if err != nil {
 					return nil, err
 				}
-				buffer = append(buffer, []byte(outs))
+				if outs != "" {
+					buffer = append(buffer, []byte(outs))
+				}
+			default:
+				return buffer, fmt.Errorf("invalid Datatype of nested structure type:%s annotation:%s - abort",
+					currentRecord.Type().Name(), currentRecordTag)
 			}
 		}
 
@@ -105,81 +128,149 @@ func iterateStructFieldsAndBuildOutput(message interface{}, depth int, enc Encod
 	return buffer, nil
 }
 
-func processOneRecord(recordType string, currentRecord reflect.Value, generatedSequenceNumber int, location *time.Location, repeatDelimiter, componentDelimiter, escapeDelimiter *string) (string, error) {
+func processSegment(recordType string, subDepth int, currentRecord reflect.Value, generatedSequenceNumber int, location *time.Location, delimiters Delimiters) (string, error) {
 
 	fieldList := make(OutputRecords, 0)
+
+	isWorthGeneratingThisRecord := false
 
 	for i := 0; i < currentRecord.NumField(); i++ {
 
 		field := currentRecord.Field(i)
-		fieldAstmTag := currentRecord.Type().Field(i).Tag.Get("astm")
-		fieldAstmTagsList := strings.Split(fieldAstmTag, ",")
+		fieldTag := currentRecord.Type().Field(i).Tag.Get("hl7")
+		fieldTagsList := strings.Split(fieldTag, ",")
 
-		fieldIdx, repeatIdx, componentIdx, err := readFieldAddressAnnotation(fieldAstmTagsList[0])
+		fieldIdx, repeatIdx, componentIdx, err := readFieldAddressAnnotation(fieldTagsList[0])
 		if err != nil {
-			return "", errors.New(fmt.Sprintf("Invalid annotation for field %s : (%s)", field.Type().Name(), err))
+			return "", fmt.Errorf("invalid annotation for field %s : (%s)", field.Type().Name(), err)
 		}
 
 		//fmt.Printf("Decode %+v to %d.%d.%d for %s\n", fieldAstmTagsList, fieldIdx, repeatIdx, componentIdx, field.String())
 
-		switch field.Type().Name() {
-		case "string":
+		switch field.Type().Kind() {
+		case reflect.String:
 			value := ""
 
-			if sliceContainsString(fieldAstmTagsList, ANNOTATION_SEQUENCE) {
-				return "", errors.New(fmt.Sprintf("Invalid annotation %s for string-field", ANNOTATION_SEQUENCE))
+			if sliceContainsString(fieldTagsList, ANNOTATION_SEQUENCE) {
+				return "", fmt.Errorf("invalid annotation %s for string-field", ANNOTATION_SEQUENCE)
 			}
 
 			// if no delimiters are given, default is \^&
-			if sliceContainsString(fieldAstmTagsList, ANNOTATION_DELIMITER) && field.String() == "" {
-				value = *repeatDelimiter + *componentDelimiter + *escapeDelimiter
+			if sliceContainsString(fieldTagsList, ANNOTATION_DELIMITER) && field.String() == "" {
+				value = delimiters.Sub + delimiters.Repeat + delimiters.Escape + delimiters.SubSub
 			} else {
 				value = field.String()
 			}
 
-			fieldList = addASTMFieldToList(fieldList, fieldIdx, repeatIdx, componentIdx, value)
-		case "int":
+			if value != "" {
+				isWorthGeneratingThisRecord = true
+			}
+
+			fieldList = addFieldToOutput(fieldList, fieldIdx, repeatIdx, componentIdx, value)
+		case reflect.Int:
 			value := fmt.Sprintf("%d", field.Int())
-			if sliceContainsString(fieldAstmTagsList, ANNOTATION_SEQUENCE) {
+			if sliceContainsString(fieldTagsList, ANNOTATION_SEQUENCE) {
 				value = fmt.Sprintf("%d", generatedSequenceNumber)
 				generatedSequenceNumber = generatedSequenceNumber + 1
 			}
 
-			fieldList = addASTMFieldToList(fieldList, fieldIdx, repeatIdx, componentIdx, value)
-		case "float32", "float64":
+			fieldList = addFieldToOutput(fieldList, fieldIdx, repeatIdx, componentIdx, value)
+		case reflect.Float32, reflect.Float64:
 			//TODO: Add annotation for amount of decimals
 			value := fmt.Sprintf("%.3f", field.Float())
-			fieldList = addASTMFieldToList(fieldList, fieldIdx, repeatIdx, componentIdx, value)
-		case "Time":
-			time := field.Interface().(time.Time)
+			fieldList = addFieldToOutput(fieldList, fieldIdx, repeatIdx, componentIdx, value)
+		case reflect.Slice:
+			value := ""
+			for i := 0; i < field.Len(); i++ {
+				var oneElementStr string
+				var err error
+				switch field.Index(i).Kind() {
+				case reflect.Int:
+					oneElementStr = field.Index(i).String()
+				case reflect.Struct:
+					oneElementStr, err = processSegment("", subDepth+1, field.Index(i), 0, location, delimiters)
+				default:
+					oneElementStr = "not implemented"
+				}
+				if err != nil {
+					return "", err
+				}
+				if i > 0 {
+					value = value + "~"
+				}
+				value = value + oneElementStr
+			}
 
-			if !time.IsZero() {
+			fieldList = addFieldToOutput(fieldList, fieldIdx, repeatIdx, componentIdx, value)
+		case reflect.Struct:
 
-				fmt.Println("Time = ", time)
+			if field.Type().Name() == "Time" { // ToDo: Ambigious Time (time.Time or sthelse.Time ?)
 
-				if sliceContainsString(fieldAstmTagsList, ANNOTATION_LONGDATE) {
-					value := time.In(location).Format("20060102150405")
-					fieldList = addASTMFieldToList(fieldList, fieldIdx, repeatIdx, componentIdx, value)
-				} else { // short date
-					value := time.In(location).Format("20060102")
-					fieldList = addASTMFieldToList(fieldList, fieldIdx, repeatIdx, componentIdx, value)
+				time := field.Interface().(time.Time)
+				if !time.IsZero() {
+					isWorthGeneratingThisRecord = true
+					if sliceContainsString(fieldTagsList, ANNOTATION_LONGDATE) {
+						value := time.In(location).Format("20060102150405")
+						fieldList = addFieldToOutput(fieldList, fieldIdx, repeatIdx, componentIdx, value)
+					} else { // short date
+						value := time.In(location).Format("20060102")
+						fieldList = addFieldToOutput(fieldList, fieldIdx, repeatIdx, componentIdx, value)
+					}
+				}
+
+			} else { // structure
+				//TODO:Limit depth to go
+				subbie, _ := processSegment("", subDepth+1, field, 0, location, delimiters)
+				if subbie != "" {
+					fieldList = addFieldToOutput(fieldList, fieldIdx, repeatIdx, componentIdx, subbie)
+					isWorthGeneratingThisRecord = true
 				}
 			}
 
 		default:
-			return "", errors.New(fmt.Sprintf("Invalid field type '%s' in struct '%s', input not processed", field.Type().Name(), currentRecord.Type().Name()))
+			return "", fmt.Errorf("invalid field type '%s' in struct '%s', input not processed", field.Type().Name(), currentRecord.Type().Name())
 		}
 
 	}
 
-	return generateOutputRecord(recordType, fieldList, *repeatDelimiter, *componentDelimiter, *escapeDelimiter), nil
+	generatePreceedingAndTrailingDelimiters := true
+	thisdelimiter := "?"
+	nextdelimiter := "?"
+	switch subDepth {
+	case 0:
+		generatePreceedingAndTrailingDelimiters = true
+		thisdelimiter = delimiters.Composite
+		nextdelimiter = delimiters.Sub
+	case 1:
+		generatePreceedingAndTrailingDelimiters = false
+		thisdelimiter = delimiters.Sub
+		nextdelimiter = delimiters.SubSub
+	case 2:
+		generatePreceedingAndTrailingDelimiters = false
+		thisdelimiter = delimiters.SubSub
+		thisdelimiter = ""
+	}
+	str, hasData := generateHL7String(recordType, fieldList, delimiters,
+		generatePreceedingAndTrailingDelimiters, thisdelimiter, nextdelimiter)
+	fmt.Printf("Build string '%s' (%d)\n", str, subDepth)
+
+	// if there is no data, or the date presented is empty were not generating this record
+	if !hasData || !isWorthGeneratingThisRecord {
+		return "", nil
+	}
+
+	// Fields with ^ or & are always right-trimmed
+	if subDepth > 0 {
+		str = strings.TrimRight(str, thisdelimiter)
+	}
+
+	return str, nil
 }
 
-func addASTMFieldToList(data []OutputRecord, field, repeat, component int, value string) []OutputRecord {
+func addFieldToOutput(data []OutputRecord, field, repeat, component int, value string) []OutputRecord {
 
 	or := OutputRecord{
 		Field:     field,
-		Repeat:    repeat,
 		Component: component,
 		Value:     value,
 	}
@@ -203,19 +294,18 @@ func (or OutputRecords) Less(i, j int) bool {
 }
 func (or OutputRecords) Swap(i, j int) { or[i], or[j] = or[j], or[i] }
 
-/* Converting a list of values (all string already) to the astm format. this funciton works only for one record
-   example:
-    (0, 0, 2) = first-arr1
-    (0, 0, 0) = third-arr1
-    (0, 1, 0) = first-arr2
-    (0, 1, 1) = second-arr2
-
-	-> .... "|first-arr1^^third-arr1\fist-arr2^second-arr2|"
-
-	returns the full record for output to astm file
-*/
-
-func generateOutputRecord(recordtype string, fieldList OutputRecords, REPEAT_DELIMITER, COMPONENT_DELIMITER, ESCAPE_DELMITER string) string {
+// generateHL7String - Converting a list of values (all string already) to the astm format. this funciton works only for one record
+//   example:
+//    (0, 0, 2) = first-arr1
+//    (0, 0, 0) = third-arr1
+//    (0, 1, 0) = first-arr2
+//    (0, 1, 1) = second-arr2
+//
+//	-> .... "|first-arr1^^third-arr1\fist-arr2^second-arr2|"
+//
+//	returns the line as string for output to file
+func generateHL7String(recordtype string, fieldList OutputRecords, delimiters Delimiters,
+	generatePreceedingAndTrailingDelimiters bool, THISDELIMTER, NEXTDELIMITER string) (string, bool) {
 
 	output := ""
 
@@ -224,48 +314,59 @@ func generateOutputRecord(recordtype string, fieldList OutputRecords, REPEAT_DEL
 	componentbuffer := make([]string, 100)
 	maxComponent := 0
 
-	repeatbuffer := make([]string, 100)
 	maxRepeat := 0
 
 	// add a terminator to reduce abortion--spaghetti-code
 	fieldList = append(fieldList, OutputRecord{Field: -1})
 
 	fieldGroup := -1 // groupchange on every field-change
-	repeatGroup := 0 // groupchange on every repeat-group (see astm-format field,repeat,component,(escape))
 
-	output = output + recordtype + "|" // Record-ID, typical "H", "R", "O", .....
+	hasProducedAnyOutput := false
+
+	if generatePreceedingAndTrailingDelimiters {
+		output = output + recordtype + THISDELIMTER // Record-ID, typical "H", "R", "O", .....
+	}
+
+	lastGeneratedFieldNo := -1 // this will help to fill in missing fields
 
 	for _, field := range fieldList {
 
+		// fill up fields just in case we skipped a field in defnition
+		if lastGeneratedFieldNo > 0 && lastGeneratedFieldNo < field.Field {
+			for i := 0; i < field.Field-lastGeneratedFieldNo; i++ {
+				output = output + THISDELIMTER
+			}
+			lastGeneratedFieldNo = field.Field - lastGeneratedFieldNo
+		}
+
 		fieldGroupBreak := field.Field != fieldGroup && fieldGroup != -1
-		repeatGroupBreak := field.Repeat != repeatGroup
-		if fieldGroupBreak || repeatGroupBreak {
+
+		if fieldGroupBreak {
 
 			buffer := ""
 			for c := 0; c <= maxComponent; c++ {
 				buffer = buffer + componentbuffer[c]
 				if c < maxComponent {
-					buffer = buffer + COMPONENT_DELIMITER
+					buffer = buffer + NEXTDELIMITER //TODO: this is not needed ? delimiters.Sub
 				}
 			}
 
-			repeatbuffer[repeatGroup] = buffer // sort components to repeatGroup, until no more items, then break
-
-			if fieldGroupBreak { // new field starts = write buffer and empty
-				for i := 0; i <= maxRepeat; i++ {
-					output = output + repeatbuffer[i]
-					if i < maxRepeat {
-						output = output + REPEAT_DELIMITER
-					}
-				}
-				output = output + "|"
-				maxRepeat = 0
-				repeatGroup = 0
+			if buffer != "" {
+				output = output + buffer
+				hasProducedAnyOutput = true
 			}
 
-			if repeatGroupBreak {
-				repeatGroup = field.Repeat
+			if generatePreceedingAndTrailingDelimiters {
+				// output = output + ">" + THISDELIMTER
+			} else {
+				//place delimiters everywhere, except lastf
+				//if fieldIndex < len(fieldList)-1 {
+				output = output + THISDELIMTER
+				//}
 			}
+
+			maxRepeat = 0
+			lastGeneratedFieldNo = field.Field // remember the last field to be able to fill gaps
 
 			for c := 0; c < len(componentbuffer); c++ {
 				componentbuffer[c] = ""
@@ -287,5 +388,11 @@ func generateOutputRecord(recordtype string, fieldList OutputRecords, REPEAT_DEL
 		}
 	}
 
-	return output
+	if !hasProducedAnyOutput { // empty should yield empty - no matter what
+		fmt.Println("Not Return with : ", output, " delmiter", THISDELIMTER)
+		return "", false
+	}
+
+	fmt.Println("Return with : ", output, " delmiter", THISDELIMTER)
+	return output, true
 }
