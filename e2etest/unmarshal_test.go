@@ -8,7 +8,6 @@ import (
 )
 
 func TestMessageIdentification(t *testing.T) {
-	//data := "MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|0||ER|ER||8859/1|\u000d"
 	data := "MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3"
 
 	messageType, protocolVersion, err := hl7.IdentifyMessage(
