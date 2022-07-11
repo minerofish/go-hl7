@@ -40,3 +40,13 @@ if err != nil {
    log.Fatal(err)		
 }
 ```
+
+To identify the version and type of the message, you can use the IdentifyMessage function.
+
+```go
+	var data string
+	messageType, protocolVersion, err := hl7.IdentifyMessage(
+		[]byte(data),
+		hl7.EncodingUTF8,
+	)
+```
