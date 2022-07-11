@@ -5,6 +5,7 @@ import (
 
 	"github.com/DRK-Blutspende-BaWueHe/go-hl7"
 	"github.com/DRK-Blutspende-BaWueHe/go-hl7/lib/hl7v23"
+	"github.com/DRK-Blutspende-BaWueHe/go-hl7/lib/hl7v24"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -44,4 +45,24 @@ func Test_cITm_Result1(t *testing.T) {
 	assert.Equal(t, "ALL", message.PatientResult[0].OrderObservation[0].ObservationRequest.UniversalServiceIdentifier.Identifier)
 
 	assert.Equal(t, 3, len(message.PatientResult[0].OrderObservation[0].Observation))
+}
+
+func TestCit_OUL_R21(t *testing.T) {
+	var filedata string
+	filedata = filedata + "MSH|^~\\&|Roche Diagnostics|cITm 1.10.02.0572|DRK FFM||20220711130056||OUL^R21|107737129|P|2.4|||NE|NE||UNICODE UTF-8<13>PID|1|?|||^|||\u000d"
+	filedata = filedata + "SAC|||AA4F1A1A6J\u000d"
+	filedata = filedata + "ORC|RE|AA4F1A1A6J|||||^^^^^?||20220709195656\u000d"
+	filedata = filedata + "OBR|1|AA4F1A1A6J||ALL||20220711075520|||||||||1^^^^^^P||||||||||||^^^^^?|||||||\u000d"
+	filedata = filedata + "OBX|1||AHBC2-R||-1\\S\\2.14|||N|||F|||20220711122749|^^^CCM2-c8k-5-1859-10#e801#2#2|bmserv\\S\\SYSTEM^System||CCM2-c8k-5-1859-10#e801#2#2|20220711122749\u000d"
+	filedata = filedata + "TCD|1|AHBC2-R|1||||||^|\u000d"
+
+	var message hl7v24.OUL_R21
+	err := hl7.Unmarshal(
+		[]byte(filedata),
+		&message,
+		hl7.EncodingUTF8,
+		hl7.TimezoneEuropeBerlin)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "AA4F1A1A6J", message.OrderObservation[0].Container.SpecimenAndContainerDetail.ContainerIdentifier.EntityIdentifier)
 }
