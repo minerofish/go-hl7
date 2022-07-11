@@ -17,7 +17,7 @@ type ORU_R01 struct {
 		}
 
 		OrderObservation []struct {
-			CommonOrder        ORC   `hl7:"ORC"`
+			CommonOrder        ORC   `hl7:"ORC,optional"`
 			ObservationRequest OBR   `hl7:"OBR,optional"`
 			NotesAndComments   []NTE `hl7:"NTE,optional"`
 			Observation        []struct {
