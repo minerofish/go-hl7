@@ -219,7 +219,9 @@ func ParseStruct(bufferedInputLines []string, depth int, currentInputLine int, t
 							// as the parse will be continued one level higher
 							break
 						} else {
-							return currentInputLine, ERROR, err
+							//It is wrong to exit here, there are maybe more fields that might match
+							// return currentInputLine, ERROR, err
+							// continue
 						}
 					}
 					if retv == ERROR { // a serious error ends the processing
