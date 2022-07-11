@@ -10,6 +10,37 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestMarshalMSH(t *testing.T) {
+	// Arrange
+	encodingType := hl7.EncodingUTF8
+	timezoneType := hl7.TimezoneEuropeBerlin
+	messageString := "MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|0||ER|ER||8859/1|\u000d"
+
+	var err error
+	var messageBytes hl7v23.ORM_001
+	err = hl7.Unmarshal(
+		[]byte(messageString),
+		&messageBytes,
+		encodingType,
+		timezoneType)
+
+	// Act
+	var marshalledMessageBytes [][]byte
+	marshalledMessageBytes, err = hl7.Marshal(
+		messageBytes,
+		hl7.StandardFieldSeparator,
+		encodingType,
+		timezoneType,
+		hl7.StandardNotation)
+
+	// Assert
+	assert.Nil(t, err)
+	assert.Nil(t, marshalledMessageBytes)
+	assert.Equal(t, 1, len(marshalledMessageBytes))
+	// TODO: fix missing empty section
+	assert.Equal(t, messageString, string(marshalledMessageBytes[0]))
+}
+
 func TestMarshalORM(t *testing.T) {
 	var message hl7v23.ORM_001
 
