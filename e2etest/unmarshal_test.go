@@ -1,5 +1,26 @@
 package e2e
 
+import (
+	"testing"
+
+	"github.com/DRK-Blutspende-BaWueHe/go-hl7/hl7"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestMessageIdentification(t *testing.T) {
+	//data := "MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|0||ER|ER||8859/1|\u000d"
+	data := "MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3"
+
+	messageType, protocolVersion, err := hl7.IdentifyMessage(
+		[]byte(data),
+		hl7.EncodingUTF8,
+	)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "ORM^O01", messageType)
+	assert.Equal(t, "2.3", protocolVersion)
+}
+
 /*
 // Test_Parse_MSH_Segment, this test has only one line
 func Test_Parse_MSH_Segment(t *testing.T) {
