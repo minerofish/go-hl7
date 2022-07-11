@@ -16,7 +16,6 @@ func Marshal(message interface{}, fieldSeparator FieldSeparator, enc Encoding, t
 	}
 
 	var delimiters Delimiters
-
 	delimiters.Composite = string(fieldSeparator)
 	delimiters.Sub = "^"
 	delimiters.Repeat = "~"
@@ -24,17 +23,6 @@ func Marshal(message interface{}, fieldSeparator FieldSeparator, enc Encoding, t
 	delimiters.SubSub = "&"
 
 	buffer, err := processStruct(message, 1, enc, location, notation, delimiters)
-
-	// the algorithm generates the pattern <field>+"|", which causes the record to always! have one delimiter too much at the end
-	/*for idx, x := range buffer {
-		str := string(x)
-		if len(str) > 2 {
-			if str[len(str)-1:] == delimiters.Composite {
-				str = str[:len(str)-1] // obsolete the very last "|"
-			}
-		}
-		buffer[idx] = []byte(str)
-	}*/
 
 	return buffer, err
 }
@@ -185,6 +173,7 @@ func processSegment(recordType string, subDepth int, currentRecord reflect.Value
 				var err error
 				switch field.Index(i).Kind() {
 				case reflect.Int:
+				case reflect.String:
 					oneElementStr = field.Index(i).String()
 				case reflect.Struct:
 					oneElementStr, err = processSegment("", subDepth+1, field.Index(i), 0, location, delimiters)
