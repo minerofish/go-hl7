@@ -24,7 +24,7 @@ Golang library for handling ASTM lis2a2 Procotol
 Install the package with the following command.
 
 ``` shell
-go get github.com/DRK-Blutspende-BaWueHe/go-astm/...
+go get github.com/DRK-Blutspende-BaWueHe/go-hl7/...
 ```
 ## Quick Start
 
