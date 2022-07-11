@@ -26,47 +26,79 @@ type Error string
 
 var EOF = fmt.Errorf("EOF")
 
+func IdentifyMessage(messageData []byte, encoding Encoding) (string, string, error) {
+	var err error
+	var messageBytes []byte
+
+	if messageBytes, err = encodeMessage(messageData, encoding); err != nil {
+		return "", "", err
+	}
+	messageString := string(messageBytes)
+
+	if len(messageString) < 4 {
+		return "", "", fmt.Errorf("invalid messageData='%s'", messageString)
+	}
+
+	if !strings.HasPrefix(messageString, "MSH") {
+		return "", "", fmt.Errorf("expected segment was MSH current segment is '%s'", messageString[0:3])
+	}
+	separator := string(messageString[3])
+
+	minSegmentPartCount := 12
+	messageStringParts := strings.Split(messageString, separator)
+	if len(messageStringParts) < minSegmentPartCount {
+		return "", "", fmt.Errorf("expected segment length was %d, current length is '%d'", minSegmentPartCount, len(messageStringParts))
+	}
+
+	messageType := string(messageStringParts[8])
+	protocolVersion := string(messageStringParts[11])
+
+	return messageType, protocolVersion, err
+}
+
+func encodeMessage(messageData []byte, enc Encoding) ([]byte, error) {
+	var messageBytes []byte
+	var err error
+
+	switch enc {
+	case EncodingUTF8:
+		return messageData, nil
+	case EncodingASCII:
+		return messageData, nil
+	case EncodingDOS866:
+		messageBytes, err = EncodeCharsetToUTF8From(charmap.CodePage866, messageData)
+		return messageBytes, err
+	case EncodingDOS855:
+		messageBytes, err = EncodeCharsetToUTF8From(charmap.CodePage855, messageData)
+		return messageBytes, err
+	case EncodingDOS852:
+		messageBytes, err = EncodeCharsetToUTF8From(charmap.CodePage852, messageData)
+		return messageBytes, err
+	case EncodingWindows1250:
+		messageBytes, err = EncodeCharsetToUTF8From(charmap.Windows1250, messageData)
+		return messageBytes, err
+	case EncodingWindows1251:
+		messageBytes, err = EncodeCharsetToUTF8From(charmap.Windows1251, messageData)
+		return messageBytes, err
+	case EncodingWindows1252:
+		messageBytes, err = EncodeCharsetToUTF8From(charmap.Windows1252, messageData)
+		return messageBytes, err
+	case EncodingISO8859_1:
+		messageBytes, err = EncodeCharsetToUTF8From(charmap.ISO8859_1, messageData)
+		return messageBytes, err
+	}
+
+	return []byte{}, fmt.Errorf("invalid Codepage Id='%d' - %w", enc, err)
+}
+
 func Unmarshal(messageData []byte, targetStruct interface{}, enc Encoding, tz Timezone) error {
 	var (
 		messageBytes []byte
 		err          error
 	)
 
-	switch enc {
-	case EncodingUTF8:
-		messageBytes = messageData
-	case EncodingASCII:
-		messageBytes = messageData
-	case EncodingDOS866:
-		if messageBytes, err = EncodeCharsetToUTF8From(charmap.CodePage866, messageData); err != nil {
-			return err
-		}
-	case EncodingDOS855:
-		if messageBytes, err = EncodeCharsetToUTF8From(charmap.CodePage855, messageData); err != nil {
-			return err
-		}
-	case EncodingDOS852:
-		if messageBytes, err = EncodeCharsetToUTF8From(charmap.CodePage852, messageData); err != nil {
-			return err
-		}
-	case EncodingWindows1250:
-		if messageBytes, err = EncodeCharsetToUTF8From(charmap.Windows1250, messageData); err != nil {
-			return err
-		}
-	case EncodingWindows1251:
-		if messageBytes, err = EncodeCharsetToUTF8From(charmap.Windows1251, messageData); err != nil {
-			return err
-		}
-	case EncodingWindows1252:
-		if messageBytes, err = EncodeCharsetToUTF8From(charmap.Windows1252, messageData); err != nil {
-			return err
-		}
-	case EncodingISO8859_1:
-		if messageBytes, err = EncodeCharsetToUTF8From(charmap.ISO8859_1, messageData); err != nil {
-			return err
-		}
-	default:
-		return fmt.Errorf("invalid Codepage Id='%d' - %w", enc, err)
+	if messageBytes, err = encodeMessage(messageData, enc); err != nil {
+		return err
 	}
 
 	// first try to break by 0x0a (non-standard, but used sometimes)
