@@ -120,7 +120,7 @@ func processOneRecord(recordType string, currentRecord reflect.Value, generatedS
 			return "", errors.New(fmt.Sprintf("Invalid annotation for field %s : (%s)", field.Type().Name(), err))
 		}
 
-		//fmt.Printf("Decode %+v to %d.%d.%d for %s\n", fieldAstmTagsList, fieldIdx, repeatIdx, componentIdx, field.String())
+		// fmt.Printf("Decode %+v to %d.%d.%d for %s\n", fieldAstmTagsList, fieldIdx, repeatIdx, componentIdx, field.String())
 
 		switch field.Type().Name() {
 		case "string":
@@ -155,7 +155,7 @@ func processOneRecord(recordType string, currentRecord reflect.Value, generatedS
 
 			if !time.IsZero() {
 
-				fmt.Println("Time = ", time)
+				// fmt.Println("Time = ", time)
 
 				if sliceContainsString(fieldAstmTagsList, ANNOTATION_LONGDATE) {
 					value := time.In(location).Format("20060102150405")

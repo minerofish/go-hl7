@@ -89,7 +89,7 @@ func Unmarshal(messageData []byte, targetStruct interface{}, enc Encoding, tz Ti
 		bufferedInputLines[i] = strings.Trim(bufferedInputLines[i], string([]byte{0x0D}))
 		bufferedInputLines[i] = strings.Trim(bufferedInputLines[i], string([]byte{0x0A}))
 		bufferedInputLines[i] = strings.Trim(bufferedInputLines[i], string([]byte{0x0D}))
-		fmt.Println(">", bufferedInputLines[i])
+		// fmt.Println(">", bufferedInputLines[i])
 	}
 
 	var delimiters Delimiters
@@ -335,7 +335,7 @@ func parseStructA(inputStr string, subdepth int, record reflect.Value, timezone 
 		delimiterBySubDepth = delimiters.SubSub
 	}
 
-	fmt.Printf("  Segment(%s: %d,%s) '%s'\n", record.Type().Name(), subdepth, delimiterBySubDepth, inputStr)
+	// fmt.Printf("  Segment(%s: %d,%s) '%s'\n", record.Type().Name(), subdepth, delimiterBySubDepth, inputStr)
 
 	if reflect.ValueOf(record).Type().Kind() != reflect.Struct {
 		return fmt.Errorf("invalid type of target: '%s', expecting 'struct'", reflect.ValueOf(record).Type().Kind())
@@ -390,8 +390,7 @@ func parseStructA(inputStr string, subdepth int, record reflect.Value, timezone 
 			} else if sliceContainsString(hl7TagsList, ANNOTATION_FIELDSEPARATOR) {
 				reflect.ValueOf(recordFieldInterface).Elem().SetString(delimiters.Composite)
 			} else if value, err := extractFieldByRepeatAndComponent(inputFields[addr_component], nextDelimiterBySubDepth, delimiters.Repeat, addr_repeat, addr_subcomponent); err == nil {
-
-				fmt.Printf("    %s = '%s'\n", recordfield.Type().Name(), value)
+				// fmt.Printf("    %s = '%s'\n", recordfield.Type().Name(), value)
 				reflect.ValueOf(recordFieldInterface).Elem().Set(reflect.ValueOf(value))
 			} else {
 				if inputIsRequired { // by default we ignore missing input
@@ -564,8 +563,7 @@ func getTypeArray(arr interface{}) reflect.Type {
 
 // this function ettracts the field by repeat and component-delimiter
 func extractFieldByRepeatAndComponent(text string, cutDelimiter, repeatDelimiter string, repeat int, component int) (string, error) {
-
-	fmt.Printf("      cut: %s by (%s,%s) at (%d[%d])\n", text, cutDelimiter, repeatDelimiter, repeat, component)
+	// fmt.Printf("      cut: %s by (%s,%s) at (%d[%d])\n", text, cutDelimiter, repeatDelimiter, repeat, component)
 
 	subfield := strings.Split(text, repeatDelimiter)
 	if repeat >= len(subfield) {

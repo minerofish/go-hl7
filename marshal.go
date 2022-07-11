@@ -145,7 +145,7 @@ func processSegment(recordType string, subDepth int, currentRecord reflect.Value
 			return "", fmt.Errorf("invalid annotation for field %s : (%s)", field.Type().Name(), err)
 		}
 
-		//fmt.Printf("Decode %+v to %d.%d.%d for %s\n", fieldAstmTagsList, fieldIdx, repeatIdx, componentIdx, field.String())
+		// fmt.Printf("Decode %+v to %d.%d.%d for %s\n", fieldAstmTagsList, fieldIdx, repeatIdx, componentIdx, field.String())
 
 		switch field.Type().Kind() {
 		case reflect.String:
@@ -252,7 +252,7 @@ func processSegment(recordType string, subDepth int, currentRecord reflect.Value
 	}
 	str, hasData := generateHL7String(recordType, fieldList, delimiters,
 		generatePreceedingAndTrailingDelimiters, thisdelimiter, nextdelimiter)
-	fmt.Printf("Build string '%s' (%d)\n", str, subDepth)
+	// fmt.Printf("Build string '%s' (%d)\n", str, subDepth)
 
 	// if there is no data, or the date presented is empty were not generating this record
 	if !hasData || !isWorthGeneratingThisRecord {
@@ -389,10 +389,10 @@ func generateHL7String(recordtype string, fieldList OutputRecords, delimiters De
 	}
 
 	if !hasProducedAnyOutput { // empty should yield empty - no matter what
-		fmt.Println("Not Return with : ", output, " delmiter", THISDELIMTER)
+		// fmt.Println("Not Return with : ", output, " delmiter", THISDELIMTER)
 		return "", false
 	}
 
-	fmt.Println("Return with : ", output, " delmiter", THISDELIMTER)
+	// fmt.Println("Return with : ", output, " delmiter", THISDELIMTER)
 	return output, true
 }
