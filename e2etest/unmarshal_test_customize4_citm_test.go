@@ -73,4 +73,16 @@ func TestCit_OUL_R21(t *testing.T) {
 	assert.Equal(t, 1, len(message.OrderObservation[0].CommonOrder.QuantityTiming))
 	assert.Equal(t, "?", message.OrderObservation[0].CommonOrder.QuantityTiming[0].Priority)
 	assert.Equal(t, time.Date(2022, time.July, 9, 17, 56, 56, 0, time.UTC), message.OrderObservation[0].CommonOrder.DateTimeOfTransaction)
+
+	assert.Equal(t, 1, len(message.OrderObservation[0].Observation))
+	assert.Equal(t, 1, message.OrderObservation[0].Observation[0].Observation.SetID)
+	assert.Equal(t, "AHBC2-R", message.OrderObservation[0].Observation[0].Observation.ObservationIdentifier.Identifier)
+
+	assert.Equal(t, 1, len(message.OrderObservation[0].Observation[0].Observation.ObservationValue))
+	assert.Equal(t, "-1\\S\\2.14", message.OrderObservation[0].Observation[0].Observation.ObservationValue[0])
+
+	assert.Equal(t, "N", message.OrderObservation[0].Observation[0].Observation.AbnormalFlags)
+	assert.Equal(t, "F", message.OrderObservation[0].Observation[0].Observation.ResultStatus)
+
+	// TODO finish this test by nailing down the correct values and their fields
 }

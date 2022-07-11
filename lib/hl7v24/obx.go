@@ -9,7 +9,7 @@ type OBX struct {
 	ValueType                    string    `hl7:"2"`
 	ObservationIdentifier        CE        `hl7:"3"`
 	ObservationSubID             string    `hl7:"4"`
-	ObervationValue              []string  `hl7:"5"`
+	ObservationValue             []string  `hl7:"5"`
 	Units                        CE        `hl7:"6"`
 	ReferenceRange               string    `hl7:"7"`
 	AbnormalFlags                []string  `hl7:"8"`
