@@ -1,9 +1,9 @@
 # go-astm ![build status](https://travis-ci.org/78bit/uuid.svg?branch=master)
 
-Golang library for handling ASTM lis2a2 Procotol
+Golang library for handling hl7 2.x Procotol
 
 ###### Install
-`go get github.com/DRK-Blutspende-BaWueHe/go-astm`
+`go get github.com/DRK-Blutspende-BaWueHe/go-hl7`
 
 ## Features
   - Encoding 
@@ -19,28 +19,23 @@ Golang library for handling ASTM lis2a2 Procotol
   - Timezone Support
   - Marshal/Unmarshal function
 
-## Installation
-
-Install the package with the following command.
-
-``` shell
-go get github.com/DRK-Blutspende-BaWueHe/go-astm/...
-```
 ## Quick Start
 
-The following Go code decodes a ASTM read from a File.
+The following Go code decodes a hl7 read from a File.
 
 ``` go
-fileData, err := ioutil.ReadFile("protocoltest/becom/5.2/bloodtype.astm")
+fileData, err := ioutil.ReadFile("tbd.hl7")
 if err != nil {
   log.Fatal(err)		
 }
 
-message, err := astm1384.Unmarshal(fileData,
- astm1384.EncodingWindows1252, 
- astm1384.TimezoneEuropeBerlin, 
- astm1384.LIS2A2)
-
+var message 
+err := hl7.Unmarshal(
+		[]byte(filedata),
+		&message,
+		hl7.EncodingUTF8,
+		hl7.TimezoneEuropeBerlin)
+    
 if err != nil {
    log.Fatal(err)		
 }
