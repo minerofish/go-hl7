@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"testing"
+	"time"
 
 	"github.com/DRK-Blutspende-BaWueHe/go-hl7"
 	"github.com/DRK-Blutspende-BaWueHe/go-hl7/lib/hl7v23"
@@ -47,6 +48,7 @@ func Test_cITm_Result1(t *testing.T) {
 	assert.Equal(t, 3, len(message.PatientResult[0].OrderObservation[0].Observation))
 }
 
+// This test ensures that the analysis-results from Cobas cITm are understood
 func TestCit_OUL_R21(t *testing.T) {
 	var filedata string
 	filedata = filedata + "MSH|^~\\&|Roche Diagnostics|cITm 1.10.02.0572|DRK FFM||20220711130056||OUL^R21|107737129|P|2.4|||NE|NE||UNICODE UTF-8<13>PID|1|?|||^|||\u000d"
@@ -64,5 +66,11 @@ func TestCit_OUL_R21(t *testing.T) {
 		hl7.TimezoneEuropeBerlin)
 
 	assert.Nil(t, err)
+	assert.Equal(t, 1, len(message.OrderObservation))
 	assert.Equal(t, "AA4F1A1A6J", message.OrderObservation[0].Container.SpecimenAndContainerDetail.ContainerIdentifier.EntityIdentifier)
+	assert.Equal(t, "RE", message.OrderObservation[0].CommonOrder.OrderControl)
+	assert.Equal(t, "AA4F1A1A6J", message.OrderObservation[0].CommonOrder.PlacerOrderNumber.EntityIdentifier)
+	assert.Equal(t, 1, len(message.OrderObservation[0].CommonOrder.QuantityTiming))
+	assert.Equal(t, "?", message.OrderObservation[0].CommonOrder.QuantityTiming[0].Priority)
+	assert.Equal(t, time.Date(2022, time.July, 9, 17, 56, 56, 0, time.UTC), message.OrderObservation[0].CommonOrder.DateTimeOfTransaction)
 }
