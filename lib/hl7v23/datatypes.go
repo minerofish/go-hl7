@@ -76,6 +76,15 @@ type DLN struct {
 // XON - Extended Composite Name And ID For Organizations
 // https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/XON
 type XON struct {
+	OrganizationName                           string  `hl7:"0"`
+	OrganizationNameTypeCode                   string  `hl7:"1"`
+	IdNumber                                   float32 `hl7:"2"`
+	CheckDigit                                 string  `hl7:"3"`
+	CodeIdentifyingTheCheckDigitSchemeEmployed string  `hl7:"4"`
+	AssigningAuthority                         HD      `hl7:"5"`
+	IdentifyerTypeCode                         string  `hl7:"6"`
+	AssigningFAcilityId                        HD      `hl7:"7"`
+	NameRepresentationCode                     string  `hl7:"8"`
 }
 
 // XCN - Extended Composite ID Number And Name
