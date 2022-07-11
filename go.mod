@@ -3,7 +3,6 @@ module github.com/DRK-Blutspende-BaWueHe/go-hl7
 go 1.17
 
 require (
-	github.com/DRK-Blutspende-BaWueHe/go-astm v0.9.7
 	github.com/aglyzov/charmap v0.0.0-20151220132847-945fb53710f2
 	github.com/stretchr/testify v1.7.1
 )
