@@ -9,8 +9,7 @@ import (
 )
 
 // Marshal - wrap datastructure to code
-func Marshal(message interface{}, enc Encoding, tz Timezone, notation Notation) ([][]byte, error) {
-
+func Marshal(message interface{}, fieldSeparator FieldSeparator, enc Encoding, tz Timezone, notation Notation) ([][]byte, error) {
 	location, err := time.LoadLocation(string(tz))
 	if err != nil {
 		return [][]byte{}, err
@@ -18,7 +17,7 @@ func Marshal(message interface{}, enc Encoding, tz Timezone, notation Notation) 
 
 	var delimiters Delimiters
 
-	delimiters.Composite = "|"
+	delimiters.Composite = string(fieldSeparator)
 	delimiters.Sub = "^"
 	delimiters.Repeat = "~"
 	delimiters.Escape = "\\"

@@ -17,7 +17,7 @@ func TestMarshalORM(t *testing.T) {
 	message.MSH.SendingApplication.UniversalId = "UniversalId"
 	message.MSH.SendingApplication.UniversalIdType = "UniversalIdType"
 
-	bytes, err := hl7.Marshal(message, hl7.EncodingASCII, hl7.TimezoneEuropeBerlin, hl7.StandardNotation)
+	bytes, err := hl7.Marshal(message, hl7.StandardFieldSeparator, hl7.EncodingASCII, hl7.TimezoneEuropeBerlin, hl7.StandardNotation)
 
 	assert.Nil(t, err)
 	for _, x := range bytes {
@@ -43,7 +43,7 @@ func TestMarshalAnUnmarshal_1(t *testing.T) {
 	fmt.Println("1 ", message.Patient.PatientIdentification.ExternalID[0].Id)
 	fmt.Println("2 ", message.Patient.PatientIdentification.ExternalID[0].CheckDigit)
 
-	bytes, err := hl7.Marshal(message, hl7.EncodingASCII, hl7.TimezoneEuropeBerlin, hl7.StandardNotation)
+	bytes, err := hl7.Marshal(message, hl7.StandardFieldSeparator, hl7.EncodingASCII, hl7.TimezoneEuropeBerlin, hl7.StandardNotation)
 
 	assert.Nil(t, err)
 	ofile := strings.Split(filedata, "\u000d")
