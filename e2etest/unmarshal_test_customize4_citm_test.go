@@ -94,7 +94,7 @@ func TestCit_OUL_R21(t *testing.T) {
 	assert.Equal(t, "-1\\S\\2.14", message.OrderObservation[0].Observation[0].Observation.ObservationValue[0])
 	assert.Equal(t, "N", message.OrderObservation[0].Observation[0].Observation.AbnormalFlags[0])
 	assert.Equal(t, "F", message.OrderObservation[0].Observation[0].Observation.ResultStatus)
-	assert.Equal(t, time.Time(time.Date(2022, time.July, 11, 10, 27, 49, 0, time.UTC)), message.OrderObservation[0].Observation[0].Observation.DateTimeOfObervation)
+	assert.Equal(t, time.Time(time.Date(2022, time.July, 11, 10, 27, 49, 0, time.UTC)), message.OrderObservation[0].Observation[0].Observation.DateTimeOfObservation)
 	assert.Equal(t, "CCM2-c8k-5-1859-10#e801#2#2", message.OrderObservation[0].Observation[0].Observation.ProducersID.AlternateIdentifier)
 	assert.Equal(t, "bmserv\\S\\SYSTEM", message.OrderObservation[0].Observation[0].Observation.ResponsibleObserver.ID)
 

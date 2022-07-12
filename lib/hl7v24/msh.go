@@ -2,31 +2,31 @@ package hl7v24
 
 import "time"
 
-// MSH - Message header segment
+// HL7 v2.4 - MSH - Message Header
 // https://hl7-definition.caristix.com/v2/HL7v2.4/Segments/MSH
 type MSH struct {
-	FieldSeparator string `hl7:"1,fieldseparator"`
+	FieldSeparator string `hl7:"1,fieldseparator" json:"FieldSeparator"`
 	// the fieldseparater is regarded as field#1 which doesnt work out with splitting the fields
 	// therefore the fields are all offest -1 to the documentation
-	EncodingCharacters                  string    `hl7:"1,delimiter"`
-	SendingApplication                  HD        `hl7:"2"`
-	SendingFacility                     HD        `hl7:"3"`
-	ReceivingApplication                HD        `hl7:"4"`
-	ReceivingFacility                   HD        `hl7:"5"`
-	DateTimeOfMessage                   time.Time `hl7:"6,longdate"`
-	Security                            string    `hl7:"7"`
-	MessageType                         string    `hl7:"8.1"`
-	MessageTriggerEvent                 string    `hl7:"8.2"`
-	MessageControlID                    string    `hl7:"9"`
-	ProccessingID                       string    `hl7:"10"`
-	VersionID                           string    `hl7:"11"`
-	SequenceNumber                      int       `hl7:"12"`
-	ContinuationPointer                 string    `hl7:"13"`
-	AcceptAcknowledgementType           string    `hl7:"14"`
-	ApplicationAcknowledgementType      string    `hl7:"15"`
-	CountryCode                         string    `hl7:"16"`
-	CharacterSet                        []string  `hl7:"17"`
-	PrincipalLanguageOfMessage          CE        `hl7:"18"`
-	AlternateCharacterSetHandlingScheme string    `hl7:"19"`
-	ConformanceStatementID              string    `hl7:"20"`
+	EncodingCharacters                  string    `hl7:"1,delimiter" json:"EncodingCharacters"`
+	SendingApplication                  HD        `hl7:"2" json:"SendingApplication"`
+	SendingFacility                     HD        `hl7:"3" json:"SendingFacility"`
+	ReceivingApplication                HD        `hl7:"4" json:"ReceivingApplication"`
+	ReceivingFacility                   HD        `hl7:"5" json:"ReceivingFacility"`
+	DateTimeOfMessage                   time.Time `hl7:"6,longdate" json:"DateTimeOfMessage"`
+	Security                            string    `hl7:"7" json:"Security"`
+	MessageType                         string    `hl7:"8.1" json:"MessageType"`
+	MessageTriggerEvent                 string    `hl7:"8.2" json:"MessageTriggerEvent"`
+	MessageControlID                    string    `hl7:"9" json:"MessageControlID"`
+	ProccessingID                       string    `hl7:"10" json:"ProccessingID"`
+	VersionID                           string    `hl7:"11" json:"VersionID"`
+	SequenceNumber                      int       `hl7:"12" json:"SequenceNumber"`
+	ContinuationPointer                 string    `hl7:"13" json:"ContinuationPointer"`
+	AcceptAcknowledgementType           string    `hl7:"14" json:"AcceptAcknowledgementType"`
+	ApplicationAcknowledgementType      string    `hl7:"15" json:"ApplicationAcknowledgementType"`
+	CountryCode                         string    `hl7:"16" json:"CountryCode"`
+	CharacterSet                        []string  `hl7:"17" json:"CharacterSet"`
+	PrincipalLanguageOfMessage          CE        `hl7:"18" json:"PrincipalLanguageOfMessage"`
+	AlternateCharacterSetHandlingScheme string    `hl7:"19" json:"AlternateCharacterSetHandlingScheme"`
+	ConformanceStatementID              string    `hl7:"20" json:"ConformanceStatementID"`
 }
