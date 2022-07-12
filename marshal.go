@@ -298,7 +298,25 @@ func generateHL7String(recordtype string, fieldList OutputRecords, delimiters De
 		}
 	}
 
-	// if its end of the record then append a CR
+	// remove empty fields from the end
+	lastFieldIdxWithData := 0
+	outputParts := strings.Split(output, delimiters.Composite)
+	for b := len(outputParts) - 1; b >= 0; b-- {
+		if outputParts[b] != "" && outputParts[b] != "0" {
+			lastFieldIdxWithData = b
+			break
+		}
+	}
+	output = ""
+	for i := 0; i <= lastFieldIdxWithData; i++ {
+		output += outputParts[i]
+
+		if i < lastFieldIdxWithData {
+			output += delimiters.Composite
+		}
+	}
+
+	// if its end of the segment then append a CR
 	if generatePreceedingAndTrailingDelimiters {
 		if recordtype == "MSH" {
 			output += delimiters.Composite
