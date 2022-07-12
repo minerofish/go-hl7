@@ -1,0 +1,80 @@
+package hl7v24
+
+import "time"
+
+// HL7 v2.4 - IN2 - Insurance Additional Information
+// https://hl7-definition.caristix.com/v2/HL7v2.4/Segments/IN2
+type IN2 struct {
+	InsuredEmployeeID                    []CX        `hl7:"1" json:"InsuredEmployeeID"`
+	InsuredSSN                           string      `hl7:"2" json:"InsuredSSN"`
+	InsuredEmployerName                  []XCN       `hl7:"3" json:"InsuredEmployerName"`
+	EmployerInformationData              string      `hl7:"4" json:"EmployerInformationData"`
+	MailClaimParty                       []string    `hl7:"5" json:"MailClaimParty"`
+	MedicareHealthInsCardNumber          string      `hl7:"6" json:"MedicareHealthInsCardNumber"`
+	MedicaidCaseName                     []XPN       `hl7:"7" json:"MedicaidCaseName"`
+	MedicaidCaseNumber                   string      `hl7:"8" json:"MedicaidCaseNumber"`
+	MilitarySponsorName                  []XPN       `hl7:"9" json:"MilitarySponsorName"`
+	MilitaryIDNumber                     string      `hl7:"10" json:"MilitaryIDNumber"`
+	DependentOfMilitaryRecipient         CE          `hl7:"11" json:"DependentOfMilitaryRecipient"`
+	MilitaryOrganization                 string      `hl7:"12" json:"MilitaryOrganization"`
+	MilitaryStation                      string      `hl7:"13" json:"MilitaryStation"`
+	MilitaryService                      string      `hl7:"14" json:"MilitaryService"`
+	MilitaryRank                         string      `hl7:"15" json:"MilitaryRank"`
+	MilitaryStatus                       string      `hl7:"16" json:"MilitaryStatus"`
+	MilitaryRetireDate                   time.Time   `hl7:"17,shortdate" json:"MilitaryRetireDate"`
+	MilitaryNonAvailCertOnFile           string      `hl7:"18" json:"MilitaryNonAvailCertOnFile"`
+	BabyCoverage                         string      `hl7:"19" json:"BabyCoverage"`
+	CombineBabyBill                      string      `hl7:"20" json:"CombineBabyBill"`
+	BloodDeductible                      string      `hl7:"21" json:"BloodDeductible"`
+	SpecialCoverageApprovalName          []XPN       `hl7:"22" json:"SpecialCoverageApprovalName"`
+	SpecialCoverageApprovalTitle         string      `hl7:"23" json:"SpecialCoverageApprovalTitle"`
+	NonCoveredInsuranceCode              []string    `hl7:"24" json:"NonCoveredInsuranceCode"`
+	PayorID                              []CX        `hl7:"25" json:"PayorID"`
+	PayorSubscriberID                    []CX        `hl7:"26" json:"PayorSubscriberID"`
+	EligibilitySource                    int         `hl7:"27" json:"EligibilitySource"`
+	RoomCoverageTypeAmount               []RMC       `hl7:"28" json:"RoomCoverageTypeAmount"`
+	PolicyTypeAmount                     []PTA       `hl7:"29" json:"PolicyTypeAmount"`
+	DailyDeductible                      DDI         `hl7:"30" json:"DailyDeductible"`
+	LivingDependency                     string      `hl7:"31" json:"LivingDependency"`
+	AmbulatoryStatus                     []string    `hl7:"32" json:"AmbulatoryStatus"`
+	Citizenship                          []CE        `hl7:"33" json:"Citizenship"`
+	PrimaryLanguage                      CE          `hl7:"34" json:"PrimaryLanguage"`
+	LivingArrangement                    string      `hl7:"35" json:"LivingArrangement"`
+	PublicityIndicator                   CE          `hl7:"36" json:"PublicityIndicator"`
+	ProtectionIndicator                  string      `hl7:"37" json:"ProtectionIndicator"`
+	StudentIndicator                     string      `hl7:"38" json:"StudentIndicator"`
+	Religion                             CE          `hl7:"39" json:"Religion"`
+	MothersMaidenName                    []XPN       `hl7:"40" json:"MothersMaidenName"`
+	Nationality                          CE          `hl7:"41" json:"Nationality"`
+	EthnicGroup                          []CE        `hl7:"42" json:"EthnicGroup"`
+	MaritalStatus                        []CE        `hl7:"43" json:"MaritalStatus"`
+	InsuredEmploymentStartDate           time.Time   `hl7:"44,shortdate" json:"InsuredEmploymentStartDate"`
+	EmploymentStopDate                   time.Time   `hl7:"45,shortdate" json:"EmploymentStopDate"`
+	JobTitle                             string      `hl7:"46" json:"JobTitle"`
+	JobCode                              JCC         `hl7:"47" json:"JobCode"`
+	JobStatus                            string      `hl7:"48" json:"JobStatus"`
+	EmployerContactPersonName            []XPN       `hl7:"49" json:"EmployerContactPersonName"`
+	EmployerContactPersonPhone           []XTN       `hl7:"50" json:"EmployerContactPersonPhone"`
+	EmployerContactReason                string      `hl7:"51" json:"EmployerContactReason"`
+	InsuredContactPersonName             []XPN       `hl7:"52" json:"InsuredContactPersonName"`
+	InsuredContactPersonTelephone        []XTN       `hl7:"53" json:"InsuredContactPersonTelephone"`
+	InsuredContactPersonReason           []string    `hl7:"54" json:"InsuredContactPersonReason"`
+	RelationshipToThePatientStartDate    time.Time   `hl7:"55,shortdate" json:"RelationshipToThePatientStartDate"`
+	RelationshipToThePatientStopDate     []time.Time `hl7:"56,shortdate" json:"RelationshipToThePatientStopDate"`
+	InsuranceCompanyContactReason        string      `hl7:"57" json:"InsuranceCompanyContactReason"`
+	InsuranceCompanyContactPhone         XTN         `hl7:"58" json:"InsuranceCompanyContactPhone"`
+	PolicyScope                          string      `hl7:"59" json:"PolicyScope"`
+	PolicySource                         string      `hl7:"60" json:"PolicySource"`
+	PatientMemberNumber                  CX          `hl7:"61" json:"PatientMemberNumber"`
+	GuarantorRelationshipToInsured       CE          `hl7:"62" json:"GuarantorRelationshipToInsured"`
+	InsuredsTelephoneNumberHome          []XTN       `hl7:"63" json:"InsuredsTelephoneNumberHome"`
+	InsuredEmployerTelephoneNumber       []XTN       `hl7:"64" json:"InsuredEmployerTelephoneNumber"`
+	MilitaryHandicappedProgram           CE          `hl7:"65" json:"MilitaryHandicappedProgram"`
+	SuspendFlag                          string      `hl7:"66" json:"SuspendFlag"`
+	CopayLimitFlag                       string      `hl7:"67" json:"CopayLimitFlag"`
+	StoplossLimitFlag                    string      `hl7:"68" json:"StoplossLimitFlag"`
+	InsuredOrganizationNameAndID         []XON       `hl7:"69" json:"InsuredOrganizationNameAndID"`
+	InsuredEmployerOrganizationNameAndID []XON       `hl7:"70" json:"InsuredEmployerOrganizationNameAndID"`
+	Race                                 []CE        `hl7:"71" json:"Race"`
+	HCFAPatientRelationshipToInsured     CE          `hl7:"72" json:"HCFAPatientRelationshipToInsured"`
+}

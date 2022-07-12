@@ -200,37 +200,37 @@ type XCN struct {
 	NameAssemblyOrder                          string `hl7:"17" json:"NameAssemblyOrder"`
 }
 
-// CM_AUI - Authorization Information
-// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_AUI
-/*type CM_AUI struct {
-	AuthorizationNumber string    `hl7:"0" json:""`
-	Date                time.Time `hl7:"1,shortdate" json:""`
-	Source              string    `hl7:"2" json:""`
-}*/
+// HL7 v2.4 - AUI - Authorization Information
+// https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/AUI
+type AUI struct {
+	AuthorizationNumber string    `hl7:"0" json:"AuthorizationNumber"`
+	Date                time.Time `hl7:"1,shortdate" json:"Date"`
+	Source              string    `hl7:"2" json:"Source"`
+}
 
-// CM_RMC - Room Coverage
-// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_RMC
-/*type CM_RMC struct {
-	RoomType       string  `hl7:"0" json:""`
-	AmmountType    string  `hl7:"1" json:""`
-	CoverageAmount float32 `hl7:"2" json:""`
-}*/
+// HL7 v2.4 - RMC - Room Coverage
+// https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/RMC
+type RMC struct {
+	RoomType       string  `hl7:"0" json:"RoomType"`
+	AmountType     string  `hl7:"1" json:"AmountType"`
+	CoverageAmount float32 `hl7:"2" json:"CoverageAmount"`
+}
 
-// CM_PTA - Policy Type
-// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_PTA
-/*type CM_PTA struct {
-	PolicyType  string  `hl7:"0" json:""`
-	AmountClass string  `hl7:"1" json:""`
-	Amount      float32 `hl7:"2" json:""`
-}*/
+// HL7 v2.4 - PTA - Policy Type
+// https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/PTA
+type PTA struct {
+	PolicyType  string  `hl7:"0" json:"PolicyType"`
+	AmountClass string  `hl7:"1" json:"AmountClass"`
+	Amount      float32 `hl7:"2" json:"Amount"`
+}
 
-// CM_DDI - Daily Deductible
-// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_DDI
-/*type CM_DDI struct {
-	DelayDays    float32 `hl7:"0" json:""`
-	Amount       float32 `hl7:"1" json:""`
-	NumberOfDays float32 `hl7:"2" json:""`
-}*/
+// HL7 v2.4 - DDI - Daily Deductible
+// https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/DDI
+type DDI struct {
+	DelayDays    float32 `hl7:"0" json:"DelayDays"`
+	Amount       float32 `hl7:"1" json:"Amount"`
+	NumberOfDays float32 `hl7:"2" json:"NumberOfDays"`
+}
 
 // HL7 v2.4 - SPS - Specimen Source
 // https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/SPS
@@ -420,24 +420,22 @@ type EI struct {
 type CM_PEN struct {
 	PenaltyType   string  `hl7:"0" json:""`
 	PenaltyAmount float32 `hl7:"1" json:""`
+}*/
+
+// HL7 v2.4 - DTN - Day Type And Number
+// https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/DTN
+type DTN struct {
+	DayType      string  `hl7:"0" json:"DayType"`
+	NumberOfDays float32 `hl7:"1" json:"NumberOfDays"`
 }
 
-
-// CM_DTN - Day Type And Number
-// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_DTN
-type CM_DTN struct {
-	DayType      string  `hl7:"0" json:""`
-	NumberOfDays float32 `hl7:"1" json:""`
+// HL7 v2.4 - PCF - Pre-certification Required
+// https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/PCF
+type PCF struct {
+	PreCertificationPatient  string    `hl7:"0" json:"PreCertificationPatient"`
+	PreCertificationRequired string    `hl7:"1" json:"PreCertificationRequired"`
+	PreCertificationWindow   time.Time `hl7:"2,longdate" json:"PreCertificationWindow"`
 }
-
-// CM_PCF - Pre-certification Required
-// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_PCF
-type CM_PCF struct {
-	PreCertificationPatient  string `hl7:"0" json:""`
-	PreCertificationRequired string `hl7:"1" json:""`
-	PreCertificationWindow   string `hl7:"2" json:""`
-}
-*/
 
 // HL7 v2.4 - LA1 - Location With Address Information
 // https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/LA1
@@ -466,14 +464,12 @@ type AD struct {
 	OtherGeographicDesignation string `hl7:"7" json:"OtherGeographicDesignation"`
 }
 
-/*
-// CM_CCD - Charge Time
-// https://hl7-definition.caristix.com/v2/HL7v2.3/DataTypes/CM_CCD
-type CM_CCD struct {
-	WhenToChargeCode string    `hl7:"0" json:""`
-	DateTime         time.Time `hl7:"1,longdate" json:""`
+// HL7 v2.4 - CCD - Charge Time
+// https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/CCD
+type CCD struct {
+	WhenToChargeCode string    `hl7:"1" json:"WhenToChargeCode"`
+	DateTime         time.Time `hl7:"2,longdate" json:"DateTime"`
 }
-*/
 
 // HL7 v2.4 - CK - Composite ID With Check Digit
 // https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/CK
@@ -482,4 +478,11 @@ type CK struct {
 	CheckDigit         string `hl7:"1" json:"CheckDigit"`
 	CodeIdentifyingCC  string `hl7:"2" json:"CodeIdentifyingCC"`
 	AssigningAuthority HD     `hl7:"3" json:"AssigningAuthority"`
+}
+
+// HL7 v2.4 - MOP - Money Or Percentage
+// https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/MOP
+type MOP struct {
+	MoneyOrPercentageIndicator string  `hl7:"0" json:"MoneyOrPercentageIndicator"`
+	MoneyOrPercentageQuantity  float32 `hl7:"1" json:"MoneyOrPercentageQuantity"`
 }
