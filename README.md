@@ -31,22 +31,37 @@ if err != nil {
 
 var message 
 err := hl7.Unmarshal(
-		[]byte(filedata),
-		&message,
-		hl7.EncodingUTF8,
-		hl7.TimezoneEuropeBerlin)
-    
+    []byte(filedata),
+    &message,
+    hl7.EncodingUTF8,
+    hl7.TimezoneEuropeBerlin)
+
 if err != nil {
    log.Fatal(err)		
+}
+```
+
+The following Go code encodes a hl7 message.
+
+``` go
+marshalledMessageBytes, err := hl7.Marshal(
+    message,
+    hl7.StandardFieldSeparator,
+    hl7.EncodingASCII,
+    hl7.TimezoneEuropeBerlin,
+    hl7.StandardNotation)
+
+if err != nil {
+   log.Fatal(err)
 }
 ```
 
 To identify the version and type of the message, you can use the IdentifyMessage function.
 
 ```go
-	var data string
-	messageType, protocolVersion, err := hl7.IdentifyMessage(
-		[]byte(data),
-		hl7.EncodingUTF8,
-	)
+var data string
+messageType, protocolVersion, err := hl7.IdentifyMessage(
+    []byte(data),
+    hl7.EncodingUTF8,
+)
 ```
