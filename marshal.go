@@ -185,7 +185,6 @@ func processSegment(recordType string, subDepth int, currentRecord reflect.Value
 				}
 			} else { // structure
 				//TODO:Limit depth to go
-				// TODO: Add /r support
 				subbie, _ := processSegment("", subDepth+1, field, 0, location, delimiters)
 				if subbie != "" {
 					fieldList = addFieldToOutput(fieldList, fieldIdx, repeatIdx, componentIdx, subbie)
@@ -270,11 +269,21 @@ func generateHL7String(recordtype string, fieldList OutputRecords, delimiters De
 		output += recordtype + THISDELIMTER
 	}
 
+	lastFieldId := 0
 	for i, field := range fieldList {
 		// do not append FieldSeparator to the output (it's a special field in the HL7)
 		if recordtype == "MSH" && i == 0 {
 			continue
 		}
+
+		// sometimes there is an empty space in the fieldList e.g. last one was 4 and the next one is 6
+		if lastFieldId+1 != field.Field {
+			// fill these fields with e.g. empty sections
+			for j := lastFieldId + 1; j < field.Field; j++ {
+				output += THISDELIMTER
+			}
+		}
+		lastFieldId = field.Field
 
 		// append data
 		output += field.Value
@@ -287,7 +296,6 @@ func generateHL7String(recordtype string, fieldList OutputRecords, delimiters De
 				output += THISDELIMTER
 			}
 		}
-
 	}
 
 	// if its end of the record then append a CR
