@@ -260,7 +260,7 @@ func (or OutputRecords) Swap(i, j int) { or[i], or[j] = or[j], or[i] }
 
 func generateHL7String(recordtype string, fieldList OutputRecords, delimiters Delimiters, generatePreceedingAndTrailingDelimiters bool, THISDELIMTER, NEXTDELIMITER string) (string, bool) {
 	// sort by Field index, keeping original order or equal elements
-	// we need to fill empty sections later; see inner section of the main lopp
+	// we need to fill empty sections later; see inner section of the main loop
 	sort.SliceStable(fieldList, func(i, j int) bool {
 		return fieldList[i].Field < fieldList[j].Field
 	})
