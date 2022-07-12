@@ -215,7 +215,6 @@ func processSegment(recordType string, subDepth int, currentRecord reflect.Value
 		thisdelimiter = delimiters.SubSub
 		thisdelimiter = ""
 	}
-
 	str, hasData := generateHL7String(recordType, fieldList, delimiters,
 		generatePreceedingAndTrailingDelimiters, thisdelimiter, nextdelimiter)
 	// fmt.Printf("Build string '%s' (%d)\n", str, subDepth)
@@ -257,87 +256,121 @@ func (or OutputRecords) Less(i, j int) bool {
 		return or[i].Field < or[j].Field
 	}
 }
+
 func (or OutputRecords) Swap(i, j int) { or[i], or[j] = or[j], or[i] }
 
-// generateHL7String - Converting a list of values (all string already) to the astm format. this funciton works only for one record
-//   example:
-//    (0, 0, 2) = first-arr1
-//    (0, 0, 0) = third-arr1
-//    (0, 1, 0) = first-arr2
-//    (0, 1, 1) = second-arr2
-//
-//	-> .... "|first-arr1^^third-arr1\fist-arr2^second-arr2|"
-//
-//	returns the line as string for output to file
 func generateHL7String(recordtype string, fieldList OutputRecords, delimiters Delimiters, generatePreceedingAndTrailingDelimiters bool, THISDELIMTER, NEXTDELIMITER string) (string, bool) {
-	sort.Sort(fieldList)
+	// sort by Field index, keeping original order or equal elements.
+	sort.SliceStable(fieldList, func(i, j int) bool {
+		return fieldList[i].Field < fieldList[j].Field
+	})
 
 	output := ""
-	componentbuffer := make([]string, 100)
-	maxComponent := 0
-	maxRepeat := 0
-	fieldList = append(fieldList, OutputRecord{Field: -1}) // add a terminator to reduce abortion--spaghetti-code
-	fieldGroup := -1                                       // groupchange on every field-change
-	hasProducedAnyOutput := false
-	lastGeneratedFieldNo := -1 // this will help to fill in missing fields
-
 	if generatePreceedingAndTrailingDelimiters {
-		output = output + recordtype + THISDELIMTER // Record-ID, typical "H", "R", "O", .....
+		output += recordtype + THISDELIMTER
 	}
 
-	for _, field := range fieldList {
-		// fill up fields just in case we skipped a field in defnition
-		if lastGeneratedFieldNo > 0 && lastGeneratedFieldNo < field.Field {
-			for i := 0; i < field.Field-lastGeneratedFieldNo; i++ {
-				output = output + THISDELIMTER
+	for i, field := range fieldList {
+		// do not append FieldSeparator to the output (it's a special field in the HL7)
+		if recordtype == "MSH" && i == 0 {
+			continue
+		}
+
+		// append data
+		output += field.Value
+
+		// append delimiter
+		if i < len(fieldList)-1 {
+			if fieldList[i+1].Component != 0 {
+				output += NEXTDELIMITER
+			} else {
+				output += THISDELIMTER
 			}
-			lastGeneratedFieldNo = field.Field - lastGeneratedFieldNo
 		}
 
-		fieldGroupBreak := field.Field != fieldGroup && fieldGroup != -1
-		if fieldGroupBreak {
-			buffer := ""
-			for c := 0; c <= maxComponent; c++ {
-				buffer = buffer + componentbuffer[c]
-				if c < maxComponent {
-					buffer = buffer + NEXTDELIMITER //TODO: this is not needed ? delimiters.Sub
-				}
-			}
-
-			if buffer != "" {
-				output = output + buffer
-				hasProducedAnyOutput = true
-			}
-
-			maxRepeat = 0
-			lastGeneratedFieldNo = field.Field // remember the last field to be able to fill gaps
-
-			for c := 0; c < len(componentbuffer); c++ {
-				componentbuffer[c] = ""
-			}
-			maxComponent = 0
-			fieldGroup = field.Field
-		}
-
-		if fieldGroup == -1 { // starting the very first group in iteration
-			fieldGroup = field.Field
-		}
-
-		componentbuffer[field.Component] = field.Value
-		if field.Component > maxComponent {
-			maxComponent = field.Component
-		}
-
-		if field.Repeat > maxRepeat {
-			maxRepeat = field.Repeat
-		}
 	}
 
-	if !hasProducedAnyOutput { // empty should yield empty - no matter what
-		// fmt.Println("Not Return with : ", output, " delmiter", THISDELIMTER)
-		return "", false
+	// if its end of the record then append a CR
+	if generatePreceedingAndTrailingDelimiters {
+		if recordtype == "MSH" {
+			output += delimiters.Composite
+		}
+		output += "\r"
 	}
 
-	// fmt.Println("Return with : ", output, " delmiter", THISDELIMTER)
 	return output, true
+
+	/*
+		sort.Sort(fieldList)
+
+		output := ""
+		componentbuffer := make([]string, 100)
+		maxComponent := 0
+		maxRepeat := 0
+		//fieldList = append(fieldList, OutputRecord{Field: -1}) // add a terminator to reduce abortion--spaghetti-code
+		fieldGroup := -1 // groupchange on every field-change
+		hasProducedAnyOutput := false
+		lastGeneratedFieldNo := -1 // this will help to fill in missing fields
+
+		if generatePreceedingAndTrailingDelimiters {
+			output = output + recordtype + THISDELIMTER // Record-ID, typical "H", "R", "O", .....
+		}
+
+		for _, field := range fieldList {
+			// fill up fields just in case we skipped a field in defnition
+			if lastGeneratedFieldNo > 0 && lastGeneratedFieldNo < field.Field {
+				for i := 0; i < field.Field-lastGeneratedFieldNo; i++ {
+					output = output + THISDELIMTER
+				}
+				lastGeneratedFieldNo = field.Field - lastGeneratedFieldNo
+			}
+
+			fieldGroupBreak := field.Field != fieldGroup && fieldGroup != -1
+			// it causes a bug: componentbuffer[0] has ER in its processing
+			if fieldGroupBreak {
+				buffer := ""
+				for c := 0; c <= maxComponent; c++ {
+					buffer = buffer + componentbuffer[c]
+					if c < maxComponent {
+						buffer = buffer + NEXTDELIMITER //TODO: this is not needed ? delimiters.Sub
+					}
+				}
+
+				if buffer != "" {
+					output = output + buffer
+					hasProducedAnyOutput = true
+				}
+
+				maxRepeat = 0
+				lastGeneratedFieldNo = field.Field // remember the last field to be able to fill gaps
+
+				for c := 0; c < len(componentbuffer); c++ {
+					componentbuffer[c] = ""
+				}
+				maxComponent = 0
+				fieldGroup = field.Field
+			}
+
+			if fieldGroup == -1 { // starting the very first group in iteration
+				fieldGroup = field.Field
+			}
+
+			componentbuffer[field.Component] = field.Value
+			if field.Component > maxComponent {
+				maxComponent = field.Component
+			}
+
+			if field.Repeat > maxRepeat {
+				maxRepeat = field.Repeat
+			}
+		}
+
+		if !hasProducedAnyOutput { // empty should yield empty - no matter what
+			// fmt.Println("Not Return with : ", output, " delmiter", THISDELIMTER)
+			return "", false
+		}
+
+		// fmt.Println("Return with : ", output, " delmiter", THISDELIMTER)
+		return output, true
+	*/
 }
