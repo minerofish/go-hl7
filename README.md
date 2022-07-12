@@ -65,3 +65,36 @@ messageType, protocolVersion, err := hl7.IdentifyMessage(
     hl7.EncodingUTF8,
 )
 ```
+## Custom Messages and Segments
+
+### Segment Definition
+You can define custom segments with the hl7 annotation. Field #0 is the Segment-identifier itself, here AL1. 
+```golang
+// HL7 v2.4 - AL1 - Patient allergy information
+// https://hl7-definition.caristix.com/v2/HL7v2.4/Segments/AL1
+type AL1 struct {
+	SetId               CE        `hl7:"1"`
+	AllergenTypeCode    CE        `hl7:"2"`
+	AllergenCode        CE        `hl7:"3"`
+	AllergySeverityCode CE        `hl7:"4"`
+	AllergyReactionCode string    `hl7:"5"`
+	IdentificationDate  time.Time `hl7:"6,shortdate"`
+}
+``` 
+### Message Defintion
+Messages are an arrangement of Segments. Use struct and []struct to group the records like so. You can then use these messages as target in the unmarshal-operation:
+
+```golang
+// HL7 v2.4 - SSU_U03 - Specimen status update
+// https://hl7-definition.caristix.com/v2/HL7v2.4/TriggerEvents/SSU_U03
+type SSU_U03 struct {
+	MSH               MSH `hl7:"MSH" json:"MSH"`
+	EquipmentDetail   EQU `hl7:"EQU" json:"EquipmentDetail"`
+	SpecimenContainer []struct {
+		SpecimenContainerDetail SAC `hl7:"SAC" json:"SpecimenContainerDetail"`
+		ObservationResult       OBX `hl7:"OBX" json:"ObservationResult"`
+	}
+	Role ROL `hl7:"ROL,optional" json:"Role"`
+}
+```
+
