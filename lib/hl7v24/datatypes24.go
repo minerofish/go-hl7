@@ -235,13 +235,13 @@ type XCN struct {
 // HL7 v2.4 - SPS - Specimen Source
 // https://hl7-definition.caristix.com/v2/HL7v2.4/DataTypes/SPS
 type SPS struct {
-	SpecimenSourceNameOrCode     CE     `hl7:"0"`
+	SourceNameOrCode             CE     `hl7:"0"`
 	Additives                    string `hl7:"1"`
 	Freetext                     string `hl7:"2"`
 	BodySite                     CE     `hl7:"3"`
 	SiteModifier                 CE     `hl7:"4"`
 	CollectionModifierMethodCode CE     `hl7:"5"`
-	SpecimenRole                 CE     `hl7:"5"`
+	Role                         CE     `hl7:"6"`
 }
 
 // HL7 v2.4 - MOC - Charge To Practise

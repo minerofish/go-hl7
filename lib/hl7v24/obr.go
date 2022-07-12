@@ -5,7 +5,7 @@ import "time"
 // HL7 v2.4 - OBR - Observation Reques
 // https://hl7-definition.caristix.com/v2/HL7v2.4/Segments/OBR
 type OBR struct {
-	ObservationRequest                   string    `hl7:"1"`
+	SetID                                int       `hl7:"1"`
 	PlacerOrderNumber                    EI        `hl7:"2"`
 	FillerOrderNumber                    EI        `hl7:"3"`
 	UniversalServiceIdentifier           CE        `hl7:"4"`
