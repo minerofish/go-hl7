@@ -281,7 +281,7 @@ func generateHL7String(recordtype string, fieldList OutputRecords, delimiters De
 
 		// sometimes there is an empty space in the fieldList e.g. last one was 4 and the next one is 6
 		if lastFieldId+1 != field.Field {
-			// fill these fields with e.g. empty sections
+			// fill these fields with empty sections
 			for j := lastFieldId + 1; j < field.Field; j++ {
 				output += THISDELIMTER
 			}
