@@ -10,12 +10,13 @@ import (
 
 func TestMarshalMSH(t *testing.T) {
 	// Arrange
-	messageString := "MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|0||ER|ER||8859/1|\u000d"
+	var mshData string = "MSH|^~\\&|HL7_Host|HL7_Office|CIT|LAB|20110926125155||ORM^O01|20110926125155|P|2.3|0||ER|ER||8859/1|\u000d"
+	filedata := mshData
 
 	var err error
 	var message hl7v23.ORM_001
 	err = hl7.Unmarshal(
-		[]byte(messageString),
+		[]byte(filedata),
 		&message,
 		hl7.EncodingUTF8,
 		hl7.TimezoneEuropeBerlin)
@@ -31,7 +32,7 @@ func TestMarshalMSH(t *testing.T) {
 
 	// Assert
 	assert.Nil(t, err)
-	assert.Equal(t, messageString, string(marshalledMessageBytes[0]))
+	assert.Equal(t, mshData, string(marshalledMessageBytes[0]))
 }
 
 func TestMarshalPID(t *testing.T) {
@@ -57,6 +58,5 @@ func TestMarshalPID(t *testing.T) {
 
 	// Assert
 	assert.Nil(t, err)
-	assert.Equal(t, mshData, string(marshalledMessageBytes[0]))
 	assert.Equal(t, pidData, string(marshalledMessageBytes[1]))
 }
