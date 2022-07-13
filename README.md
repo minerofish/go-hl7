@@ -1,4 +1,4 @@
-# go-astm ![build status](https://travis-ci.org/78bit/uuid.svg?branch=master)
+# go-hl7 ![build status](https://travis-ci.org/78bit/uuid.svg?branch=master)
 
 Golang library for handling hl7 2.x Procotol
 
