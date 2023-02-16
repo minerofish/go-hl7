@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DRK-Blutspende-BaWueHe/go-hl7"
-	"github.com/DRK-Blutspende-BaWueHe/go-hl7/lib/hl7v23"
-	"github.com/DRK-Blutspende-BaWueHe/go-hl7/lib/hl7v24"
+	"github.com/minerofish/go-hl7"
+	"github.com/minerofish/go-hl7/lib/hl7v23"
+	"github.com/minerofish/go-hl7/lib/hl7v24"
 	"github.com/stretchr/testify/assert"
 )
 

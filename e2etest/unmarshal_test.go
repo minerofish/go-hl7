@@ -3,7 +3,7 @@ package e2e
 import (
 	"testing"
 
-	"github.com/DRK-Blutspende-BaWueHe/go-hl7"
+	"github.com/minerofish/go-hl7"
 	"github.com/stretchr/testify/assert"
 )
 
