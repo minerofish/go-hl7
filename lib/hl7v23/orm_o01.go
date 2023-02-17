@@ -41,20 +41,20 @@ type PatientVisit struct {
 }
 
 type Patient struct {
-	PatientIdentification PID   `hl7:"PID,optional"`
-	PatientDemographics   PD1   `hl7:"PD1,optional"`
-	NotesAndComments      []NTE `hl7:"NTE,optional"`
+	PatientIdentification     PID   `hl7:"PID,optional"`
+	PatientDemographics       PD1   `hl7:"PD1,optional"`
+	NotesAndComments          []NTE `hl7:"NTE,optional"`
+	PatientVisit              PatientVisit
+	Insurance                 []Insurance
+	Guarantor                 GT1 `hl7:"GT1,optional"`
+	PatientAllergyInformation AL1 `hl7:"AL1,optional"`
 }
 
 // ORM_O01 - Order message
 // https://hl7-definition.caristix.com/v2/HL7v2.3/TriggerEvents/ORM_O01
 type ORM_O01 struct {
-	MSH                       MSH `hl7:"MSH"`
-	NotesAndComments          NTE `hl7:"NTE,optional"`
-	Patient                   Patient
-	PatientVisit              PatientVisit
-	Insurance                 []Insurance
-	Guarantor                 GT1 `hl7:"GT1,optional"`
-	PatientAllergyInformation AL1 `hl7:"AL1,optional"`
-	Order                     []Order
+	MSH              MSH `hl7:"MSH"`
+	NotesAndComments NTE `hl7:"NTE,optional"`
+	Patient          Patient
+	Order            []Order
 }
