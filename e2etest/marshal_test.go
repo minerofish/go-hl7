@@ -14,7 +14,7 @@ func TestMarshalMSH(t *testing.T) {
 	filedata := mshData
 
 	var err error
-	var message hl7v23.ORM_001
+	var message hl7v23.ORM_O01
 	err = hl7.Unmarshal(
 		[]byte(filedata),
 		&message,
@@ -41,7 +41,7 @@ func TestMarshalPID(t *testing.T) {
 	pidData := "PID|1|a^b~^c|00100M56016||Smith^Harry||19500412|M\u000d"
 	filedata := mshData + pidData
 
-	var message hl7v23.ORM_001
+	var message hl7v23.ORM_O01
 	err := hl7.Unmarshal(
 		[]byte(filedata),
 		&message,
